@@ -1,6 +1,6 @@
 import React from 'react';
 import { createClient } from "@supabase/supabase-js";
-import { geocodePlace } from "src\api\openCageAPi.js";
+import { geocodePlace } from "src/api/openCageAPi.js";
 
 export default function InteractiveSearchResults() {
 return <div>Interactive Search Results</div>;
