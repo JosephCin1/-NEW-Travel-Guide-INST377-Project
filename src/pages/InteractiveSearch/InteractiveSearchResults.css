@@ -1,0 +1,232 @@
+.interactive-search-container {
+  text-align: center;
+}
+
+.interactive-search-container h2 {
+  margin-bottom: 5px;
+}
+.interactive-search-container p {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.username-form {
+  margin: 30px auto;
+  padding: 25px;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+}
+
+.username-form h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.username-form label {
+  font-size: 1.05em;
+  margin-bottom: 3px;
+  text-align: left;
+  color: #444;
+}
+
+.username-form input[type="text"] {
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.username-form button[type="submit"] {
+  padding: 10px 18px;
+  font-size: 1em;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.username-form button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.username-form button[type="submit"]:disabled {
+  background-color: #b0c4de; /* Lighter blue when disabled */
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545; /* Bootstrap danger color */
+  margin-top: 10px;
+  font-size: 0.95em;
+}
+
+/* Confirmation Modal Styles (can be refactored into a shared modal CSS) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 15px; /* For small screens */
+}
+
+.modal-content.confirmation-modal {
+  background-color: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  max-width: 700px; /* Wider for more details */
+  width: 95%;
+  max-height: 85vh;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.confirmation-modal h3 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.confirmation-modal h4 {
+  color: #34495e;
+  border-bottom: 1px solid #ecf0f1;
+  padding-bottom: 8px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.confirmation-details .user-detail-item,
+.confirmation-details .user-detail-nested {
+  font-size: 0.95em;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 6px;
+}
+.confirmation-details .user-detail-item strong,
+.confirmation-details .user-detail-nested strong {
+  color: #333;
+  margin-right: 8px;
+}
+.user-detail-nested div {
+  border-left: 2px solid #eee;
+  margin-top: 5px;
+}
+
+
+.modal-actions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 15px;
+}
+
+.modal-actions .confirm-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.modal-actions .confirm-btn:hover {
+  background-color: #218838;
+}
+
+.modal-actions .cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.modal-actions .cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+.no-destination-content {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.no-destination-content h2 {
+  margin-bottom: 20px;
+}
+
+.no-destination-content p {
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Adds space between buttons */
+}
+
+.action-button {
+  padding: 12px 25px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none; /* For Link components styled as buttons */
+  display: inline-block; /* For Link components */
+  background-color: #007bff; /* Primary button color */
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #0056b3;
+}
+
+.action-button.secondary {
+  background-color: #6c757d; /* Secondary button color */
+}
+
+.action-button.secondary:hover {
+  background-color: #545b62;
+}
+
+/* For general page container, loading, error (if not already defined globally) */
+.page-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+.loading-indicator {
+  text-align: center;
+  font-size: 1.2em;
+  padding: 40px;
+}
+.error-message {
+  text-align: center;
+  color: red;
+  padding: 20px;
+  border: 1px solid red;
+  border-radius: 5px;
+  background-color: #ffebeb;
+}
+.error-message button,
+.error-message a {
+    margin-top: 15px;
+}
