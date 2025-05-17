@@ -1,0 +1,149 @@
+/* Basic Navbar Styling */
+.navbar {
+  background: linear-gradient(90deg, rgb(28, 27, 27) 0%, rgb(26, 23, 23) 100%);
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  height: 80px;
+  z-index: 1;
+  width: 100%;
+  padding: 0 24px;
+  align-items: center;
+}
+
+.navbar-logo {
+  color: #fff;
+  justify-self: start;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+/* Navigation Menu Styling */
+.nav-menu {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  text-align: center;
+  margin-right: -22px; /* Adjust as needed */
+}
+
+.nav-item {
+  height: 80px;
+}
+
+.nav-links {
+  color: #fff;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  height: 100%;
+  transition: all 0.2s ease-out;
+}
+
+.nav-links:hover {
+  color: #1888ff; /* Accent color for hover */
+  border-bottom: 4px solid #1888ff;
+}
+
+/* Mobile Menu Icon (Hamburger) */
+.menu-icon {
+  display: none; /* Hidden by default, shown in media query */
+  cursor: pointer;
+}
+
+.menu-icon .bar1,
+.menu-icon .bar2,
+.menu-icon .bar3 {
+  width: 35px;
+  height: 5px;
+  background-color: #fff;
+  margin: 6px 0;
+  transition: 0.4s;
+  border-radius: 2px;
+}
+
+/* Rotate first bar */
+.menu-icon.open .bar1 {
+  transform: rotate(-45deg) translate(-9px, 6px);
+}
+
+/* Fade out the second bar */
+.menu-icon.open .bar2 {
+  opacity: 0;
+}
+
+/* Rotate last bar */
+.menu-icon.open .bar3 {
+  transform: rotate(45deg) translate(-8px, -8px);
+}
+
+
+/* Responsive Styling for Mobile */
+@media screen and (max-width: 960px) {
+  .nav-menu {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: calc(100vh - 80px); /* Full height minus navbar */
+    position: absolute;
+    top: 80px; /* Position below navbar */
+    left: -100%; /* Hidden off-screen */
+    opacity: 1;
+    transition: all 0.5s ease;
+    background: #1c2237; /* Slightly different background for mobile menu */
+  }
+
+  .nav-menu.active {
+    left: 0; /* Slide in */
+    opacity: 1;
+    transition: all 0.5s ease;
+    z-index: 1;
+  }
+
+  .nav-links {
+    text-align: center;
+    padding: 2rem;
+    width: 100%;
+    display: table;
+  }
+
+  .nav-links:hover {
+    color: #1888ff;
+    border-bottom: none; /* Remove border for mobile links */
+    transform: scale(1.1);
+  }
+
+  .navbar-logo {
+    font-size: 1.8rem; /* Slightly smaller logo on mobile */
+  }
+
+  .menu-icon {
+    display: block; /* Show hamburger icon */
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(-100%, 60%); /* Adjust position */
+    font-size: 1.8rem;
+  }
+
+  .nav-item {
+    width: 100%;
+  }
+}
