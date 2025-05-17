@@ -1,7 +1,7 @@
 // src/api/openCage.js
 import axios from 'axios';
 
-const openCageApiKey = process.env.REACT_APP_OPENCAGE_API_KEY;
+const openCageApiKey = import.meta.env.VITE_OPENCAGE_API_KEY;
 const openCageBaseUrl = 'https://api.opencagedata.com/geocode/v1/json';
 
 export async function geocodePlace(place) {
