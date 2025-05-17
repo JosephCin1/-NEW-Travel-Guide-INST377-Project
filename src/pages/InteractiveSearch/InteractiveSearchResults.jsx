@@ -1,52 +1,40 @@
-import React from 'react';
-import { createClient } from "@supabase/supabase-js";
-import { geocodePlace } from "src/api/openCageAPi.js";
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
-export default function InteractiveSearchResults() {
-return <div>Interactive Search Results</div>;
-}
+const InteractiveSearchResults = () => {
+  const location = useLocation(); // Hook to get location object
+  const searchData = location.state?.location; // Access the state passed from SearchPage
 
-function App() {
-const [instruments, setInstruments] = useState([]);
-useEffect(() => {
-getInstruments();
-}, []);
-async function getInstruments() {
-const { data } = await supabase.from("instruments").select();
-setInstruments(data);
-}
-return (
-<div style={{ fontFamily: 'Arial, sans-serif', margin: '20px' }}>
-    <h1>AI Travel Recommender Prototype</h1>
-    
-    <nav style={{ marginBottom: '20px' }}>
-    <button onClick={() => setActiveSection('geocode')} style={{ marginRight: '10px', padding: '8px 12px' }}>OpenCage Geocoding</button>
-    <button onClick={() => setActiveSection('places')} style={{ marginRight: '10px', padding: '8px 12px' }}>Google Places Search</button>
-    <button onClick={() => setActiveSection('gemini')} style={{ padding: '8px 12px' }}>Google Gemini Chat</button>
-    </nav>
+  useEffect(() => {
+    if (searchData) {
+      console.log('Received location data:', searchData);
+      // Now you can use searchData.name, searchData.lat, searchData.lon, etc.
+      // to fetch more details, display on a map, or perform other actions.
+    } else {
+      console.log('No location data received. Maybe redirect or show a message?');
+      // Optionally, redirect back to search page or show a "no location selected" message.
+    }
+  }, [searchData]);
 
-    {/* Section 1: OpenCage Geocoding */}
-    {activeSection === 'geocode' && (
-    <section style={{ marginTop: '20px' }}>
-        <h2>OpenCage Geocoding</h2>
-        <form onSubmit={handleGeocodeSubmit} style={{ marginBottom: '10px' }}>
-        <label style={{ display: 'block', margin: '5px 0' }}>
-            Place Name:
-            <input 
-            type="text" 
-            value={placeName}
-            onChange={e => setPlaceName(e.target.value)}
-            placeholder="e.g., Denver, CO"
-            required
-            style={{ padding: '6px', fontSize: '1em', width: '100%', marginTop: '5px' }}
-            />
-        </label>
-        <button type="submit" style={{ padding: '6px 12px', marginTop: '10px' }}>Geocode</button>
-        </form>
-        <pre style={{ background: '#f4f4f4', padding: '10px', overflowX: 'auto' }}>{geocodeResult}</pre>
-    </section>
-    )}
+  if (!searchData) {
+    return (
+      <div className="page-container">
+        <h2>Interactive Search</h2>
+        <p>No location selected. Please go back to the search page and choose a destination.</p>
+        {/* You might want a Link back to the search page here */}
+      </div>
+    );
+  }
 
-</div>
-);
-}
+  return (
+    <div className="page-container">
+      <h2>Interactive Search Results for: {searchData.name}</h2>
+      <p>Latitude: {searchData.lat}</p>
+      <p>Longitude: {searchData.lon}</p>
+      {/* Display map, points of interest, etc., based on these coordinates */}
+      {/* You might want to display details from searchData.address or searchData.boundingBox */}
+    </div>
+  );
+};
+
+export default InteractiveSearchResults;
