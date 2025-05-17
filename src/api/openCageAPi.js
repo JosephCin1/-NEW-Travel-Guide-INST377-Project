@@ -4,20 +4,19 @@ import axios from 'axios';
 const openCageApiKey = process.env.REACT_APP_OPENCAGE_API_KEY;
 const openCageBaseUrl = 'https://api.opencagedata.com/geocode/v1/json';
 
-export const geocodeAddress = async (address) => {
-    try {
-        const response = await axios.get(openCageBaseUrl, {
-            params: {
-                q: address,
-                key: openCageApiKey,
-                limit: 1,
-                language: 'en',
-                pretty: 1
-            }
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching geocode data:', error);
-        return null;
-    }
-};
+export async function geocodePlace(place) {
+try {
+const response = await fetch(
+    `https://api.opencagedata.com/geocode/v1/json?key=${openCageApiKey}&q=${encodeURIComponent(place)}`
+);
+if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+}
+const data = await response.json();
+    return data; // return the parsed JSON result
+} catch (error) {
+console.error('Error fetching geocode data:', error);
+    return null; // or throw error depending on your error handling strategy
+}
+}
+
