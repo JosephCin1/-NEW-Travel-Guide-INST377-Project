@@ -47,3 +47,18 @@ export const postUsername = async (newData) => {
 
   return data;
 };
+
+export const postPreferences = async (newDataArray) => {
+  // newDataArray should be an array of objects
+  const { data, error } = await supabase
+    .from('users')
+    .insert(newDataArray)
+    .select('username');
+
+  if (error) {
+    console.error("Error inserting data:", error);
+    return null;
+  }
+
+  return data;
+};

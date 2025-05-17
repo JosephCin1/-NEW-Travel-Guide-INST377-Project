@@ -1,99 +1,91 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { postPreferences } from '../api/supabaseClient';
 
-const labels = [
-  "outdoor",
-  "activity_intensity",
-  "cultural",
-  "social",
-  "budget",
-  "local_flavor",
-  "touristy",
-  "indoor",
-  "eventful",
-  "romantic",
-];
+const defaultSliders = {
+  username: '',
+  outdoor: 5,
+  activity_intensity: 5,
+  cultural: 5,
+  social: 5,
+  budget: 5,
+  local_flavor: 5,
+  touristy: 5,
+  indoor: 5,
+  eventful: 5,
+  romantic: 5,
+};
 
-export default function PreferenceSlider() {
-  const [open, setOpen] = useState(false);
-  const [values, setValues] = useState(
-    Array(labels.length).fill(null) // null means no value selected yet
-  );
+const PreferenceSliders = () => {
+  const [sliders, setSliders] = useState(defaultSliders);
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Check if all values are valid (1-10)
-  const allValid = values.every((val) => val >= 1 && val <= 10);
+  const handleChange = (key, value) => {
+    setSliders((prev) => ({ ...prev, [key]: Number(value) }));
+  };
 
-  function handleChange(index, newValue) {
-    const newValues = [...values];
-    newValues[index] = Number(newValue);
-    setValues(newValues);
-  }
+  const handleUsernameChange = (e) => {
+    setSliders((prev) => ({ ...prev, username: e.target.value }));
+  };
 
-  function handleSubmit() {
-    if (!allValid) return;
-    console.log("Submitted values:", values);
-    setOpen(false);
-  }
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setSuccess(false);
+    setError(null);
+
+    const result = await postPreferences([sliders]);
+    if (result) {
+      setSuccess(true);
+      console.log(`submitted ${sliders.username} into supadatabase`);
+    } else {
+      setError('Failed to submit preferences.');
+    }
+
+    setSubmitting(false);
+  };
 
   return (
-    <div>
-      <button onClick={() => setOpen(true)}>Open Sliders Modal</button>
+    <div style={{ padding: '1rem', maxWidth: '600px', margin: 'auto' }}>
+      <h2>Set Your Preferences</h2>
 
-      {open && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-          onClick={() => setOpen(false)} // close on backdrop click
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: 20,
-              borderRadius: 8,
-              width: 400,
-              maxHeight: "80vh",
-              overflowY: "auto",
-            }}
-            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside modal
-          >
-            <h2>Set values</h2>
+      <input
+        type="text"
+        placeholder="Enter username"
+        value={sliders.username}
+        onChange={handleUsernameChange}
+        style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
+      />
 
-            {labels.map((label, i) => (
-              <div key={label} style={{ marginBottom: 15 }}>
-                <label htmlFor={`slider-${i}`} style={{ display: "block", marginBottom: 4 }}>
-                  {label}: {values[i] ?? "-"}
-                </label>
-                <input
-                  id={`slider-${i}`}
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={values[i] ?? 1}
-                  onChange={(e) => handleChange(i, e.target.value)}
-                />
-              </div>
-            ))}
-
-            <button
-              onClick={handleSubmit}
-              disabled={!allValid}
-              style={{
-                marginTop: 10,
-                padding: "8px 16px",
-                cursor: allValid ? "pointer" : "not-allowed",
-              }}
-            >
-              Submit
-            </button>
+      {Object.entries(sliders).map(([key, value]) => {
+        if (key === 'username') return null;
+        return (
+          <div key={key} style={{ marginBottom: '1.5rem' }}>
+            <label htmlFor={key} style={{ display: 'block', marginBottom: '0.25rem' }}>
+              {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: {value}
+            </label>
+            <input
+              type="range"
+              id={key}
+              min={0}
+              max={10}
+              step={1}
+              value={value}
+              onChange={(e) => handleChange(key, e.target.value)}
+              style={{ width: '100%' }}
+            />
           </div>
-        </div>
-      )}
+        );
+      })}
+
+      <button onClick={handleSubmit} disabled={submitting || !sliders.username}>
+        {submitting ? 'Submitting...' : 'Submit Preferences'}
+      </button>
+
+      {success && <p style={{ color: 'green' }}>Preferences submitted successfully!</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
-}
+};
+
+export default PreferenceSliders;
