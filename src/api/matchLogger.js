@@ -38,7 +38,7 @@ export const logSearchMatches = async ({ searchId, matches }) => {
       match_score: match.matchScore, // <<< --- ADD THIS LINE (Ensure DB column is 'match_score')
       outdoor: match.characteristics.outdoor,
       // Ensure this mapping is correct based on what 'characteristics' object contains
-      activity_intens: match.characteristics.activity_intensity || match.characteristics.activity_intens, 
+      activity_intensity: match.characteristics.activity_intensity, 
       cultural: match.characteristics.cultural,
       social: match.characteristics.social,
       budget: match.characteristics.budget,

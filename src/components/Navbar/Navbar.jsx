@@ -45,8 +45,8 @@ const Navbar = () => {
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/interactive_search" className="nav-links" onClick={closeMobileMenu}>
-              Interactive Search
+            <Link to="/lookup-search" className="nav-links" onClick={closeMobileMenu}>
+              Lookup Search
             </Link>
           </li>
           {/* Add more links as needed */}
