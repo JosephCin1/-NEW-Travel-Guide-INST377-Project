@@ -1,32 +1,55 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Link is no longer needed here directly
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { LoadScript } from '@react-google-maps/api';
+
 import SearchPage from './pages/MainSearch/SearchPage';
 import AboutPage from './pages/About/AboutPage';
 import UserPage from './pages/User/UserPage';
+import SearchResults from './pages/SearchResults/SearchResults';
 import DestinationsPage from './pages/Destinations/DestinationsPage';
-
 import InteractiveSearchResults from './pages/InteractiveSearch/InteractiveSearchResults';
-import Navbar from './components/Navbar/Navbar'; // Your new Navbar component
+import Navbar from './components/Navbar/Navbar';
 
 import './App.css';
 
+// Google Maps API Key and libraries
+const googleApiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+const libraries = ['places'];
+
 export default function App() {
   return (
-    <Router>
-      <Navbar /> {/* Place your new Navbar component here. It will be at the top. */}
+    <LoadScript
+      googleMapsApiKey={googleApiKey}
+      libraries={libraries}
+      loadingElement={
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          fontSize: '2rem'
+        }}>
+          <span role="img" aria-label="Loading">🗺️</span> Loading Map Services...
+        </div>
+      }
+    >
+      <Router>
+        <Navbar />
 
-      <div className="app-content"> {/* Optional: wrapper for content below navbar */}
-        <Routes>
-          <Route path="/" element={<SearchPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/user" element={<UserPage />} />
-          <Route path="/interactive_search" element={<InteractiveSearchResults />} />
-          <Route path="/destinations" element={<DestinationsPage />} />
-          {/* Add other routes as needed */}
-        </Routes>
-      </div>
+        <div className="app-content">
+          <Routes>
+            <Route path="/" element={<SearchPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/user" element={<UserPage />} />
+            <Route path="/interactive_search" element={<InteractiveSearchResults />} />
+            <Route path="/destinations" element={<DestinationsPage />} />
+            <Route path="/search_results" element={<SearchResults />} />
+            {/* Add other routes as needed */}
+          </Routes>
+        </div>
 
-      <footer>© 2025 Travel Guide</footer>
-    </Router>
+        <footer>© 2025 Travel Guide</footer>
+      </Router>
+    </LoadScript>
   );
 }
