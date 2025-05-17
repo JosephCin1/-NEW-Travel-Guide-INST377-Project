@@ -1,0 +1,85 @@
+/* src/pages/LookupSearch/LookupSearchPage.css */
+.lookup-search-page {
+  padding: 20px;
+  max-width: 900px;
+  margin: 20px auto;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.lookup-search-page h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.lookup-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.lookup-input {
+  padding: 12px 15px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 350px;
+  box-sizing: border-box;
+}
+
+.lookup-button {
+  padding: 12px 25px;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.lookup-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.lookup-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 20px;
+  font-size: 1.1em;
+  color: #555;
+}
+
+.lookup-error { /* Ensure .error-message styles are defined globally or locally */
+  text-align: center;
+  color: red;
+  background-color: #ffebee;
+  padding: 15px;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  margin: 20px 0;
+}
+.lookup-error button {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #ef5350;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.lookup-error button:hover {
+    background-color: #d32f2f;
+}
+
+/* Ensure .page-container, .loading-indicator, .error-message have base styles if not already global */
+/* For ArchivedSearchResultsDisplay, it will use its own styling or SearchResults.css styles if classes match */
