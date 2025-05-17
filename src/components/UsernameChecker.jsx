@@ -1,46 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient'; // adjust path if needed
+import { fetchUsername } from '../api/supabaseClient';
+import { postUsername } from '../api/supabaseClient'; // import the function
 
-const UsernameChecker = () => {
+const UsernameChecker = ({ onAvailabilityChange }) => {
   const [username, setUsername] = useState('');
   const [available, setAvailable] = useState(null);
   const [checking, setChecking] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
-    const checkUsername = async () => {
-      if (username.length > 2) {
-        setChecking(true);
-        const { data, error } = await supabase
-          .from('users') // 👈 your table name here
-          .select('id')
-          .eq('username', username)
-          .maybeSingle();
+    let isCurrent = true;
 
-        setAvailable(!data); // data is null if username doesn't exist
-        setChecking(false);
+    const check = async () => {
+      if (username.length > 1) {
+        setChecking(true);
+        const result = await fetchUsername(username);
+        if (isCurrent) {
+          setAvailable(result);
+          onAvailabilityChange(result);
+          setChecking(false);
+          console.log('fetchUsername returned:', result);
+        }
       } else {
         setAvailable(null);
+        onAvailabilityChange(null);
       }
     };
 
-    const delayDebounce = setTimeout(() => {
-      checkUsername();
-    }, 500); // debounce typing input
+    const delayDebounce = setTimeout(check, 500);
+    return () => {
+      isCurrent = false;
+      clearTimeout(delayDebounce);
+    };
+  }, [username, onAvailabilityChange]);
 
-    return () => clearTimeout(delayDebounce);
-  }, [username]);
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+    const result = await postUsername({ username });
+    if (result) {
+      console.log(`submitted ${username} into supadatabase`);
+      setSaveSuccess(true);
+    } else {
+      setSaveError('Failed to save username');
+    }
+    setSaving(false);
+  };
 
   return (
     <div>
       <input
         type="text"
-        placeholder="Choose a username"
+        placeholder="Enter username"
         value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        onChange={(e) => {
+          setUsername(e.target.value);
+          setSaveSuccess(false);
+          setSaveError(null);
+        }}
       />
       {checking && <p>Checking...</p>}
-      {available === true && <p style={{ color: 'green' }}>Username is available ✅</p>}
-      {available === false && <p style={{ color: 'red' }}>Username is taken ❌</p>}
+      {available === true && <p style={{ color: 'green' }}>Username is available!</p>}
+      {available === false && <p style={{ color: 'red' }}>Username is taken.</p>}
+
+      {/* Show button if username length > 1 */}
+      {username.length > 1 && (
+        <button
+          onClick={handleSave}
+          disabled={saving || available === false}
+          title={available === false ? 'Username is taken' : ''}
+        >
+          {saving ? 'Saving...' : 'Save Username'}
+        </button>
+      )}
+
+      {saveSuccess && <p style={{ color: 'green' }}>Username saved successfully!</p>}
+      {saveError && <p style={{ color: 'red' }}>{saveError}</p>}
     </div>
   );
 };

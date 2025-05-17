@@ -1,85 +1,105 @@
 import React, { useState } from 'react';
+import UsernameChecker from '../../components/UsernameChecker';
+import PreferenceSlider from '../../components/PreferenceSlider';
 
-const initialUsers = [
-    { username: 'john_doe', preferences: { travel: 8 } },
-    { username: 'jane_smith', preferences: { travel: 5 } }
-];
+const UsersPage = () => {
+  const [searchText, setSearchText] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState(null);
+  const [username, setUsername] = useState('');
 
-export default function UserManagementPage() {
-    const [users, setUsers] = useState(initialUsers);
-    const [searchUsername, setSearchUsername] = useState('');
-    const [newUsername, setNewUsername] = useState('');
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [travelPreference, setTravelPreference] = useState('');
-    const [message, setMessage] = useState('');
+  const handleUsernameAvailability = (available) => {
+    setIsUsernameAvailable(available);
+  };
 
-    const handleUserLookup = () => {
-        const user = users.find(u => u.username === searchUsername.trim());
-        if (user) {
-            setSelectedUser(user);
-            setTravelPreference(user.preferences.travel);
-            setMessage('');
-        } else {
-            setMessage('User not found.');
-            setSelectedUser(null);
-        }
-    };
+  return (
+    <div style={{ padding: '2rem', maxWidth: '500px', margin: 'auto' }}>
+      <input
+        type="text"
+        placeholder="Search users"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        style={{ width: '100%', padding: '0.5rem', fontSize: '1rem', marginBottom: '1rem' }}
+      />
 
-    const handleCreateUser = () => {
-        const trimmedUsername = newUsername.trim();
-        if (trimmedUsername === '' || users.some(u => u.username === trimmedUsername)) {
-            setMessage('Username is taken or invalid.');
-            return;
-        }
-        const newUser = { username: trimmedUsername, preferences: { travel: 0 } };
-        setUsers([...users, newUser]);
-        setNewUsername('');
-        setMessage(`User ${trimmedUsername} created successfully.`);
-    };
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <button
+          onClick={() => alert(`Look up feature not implemented.\nSearch text: ${searchText}`)}
+          style={{ flex: 1, marginRight: '0.5rem', padding: '0.5rem' }}
+        >
+          Look Up
+        </button>
 
-    const handleUpdatePreferences = () => {
-        const updatedUsers = users.map(u => 
-            u.username === selectedUser.username ? { ...u, preferences: { travel: travelPreference } } : u
-        );
-        setUsers(updatedUsers);
-        setMessage(`Preferences updated for ${selectedUser.username}.`);
-    };
+        <button
+          onClick={() => {
+            setShowCreateModal(true);
+            setUsername('');
+            setIsUsernameAvailable(null);
+          }}
+          style={{ flex: 1, marginLeft: '0.5rem', padding: '0.5rem' }}
+        >
+          Create User
+        </button>
+      </div>
 
-    return (
-        <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <div style={{ marginBottom: '20px' }}>
-                <input 
-                    placeholder="Search username..." 
-                    value={searchUsername} 
-                    onChange={e => setSearchUsername(e.target.value)} 
-                    style={{ marginRight: '10px', padding: '5px', width: '200px' }}
-                />
-                <button onClick={handleUserLookup} style={{ marginRight: '10px', padding: '5px 15px' }}>Lookup User</button>
-                <button onClick={handleCreateUser} style={{ padding: '5px 15px' }}>Create User</button>
+      {showCreateModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowCreateModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: '#121212',
+              padding: '2rem',
+              borderRadius: '8px',
+              width: '100%',
+              maxWidth: '400px',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.8)',
+              position: 'relative',
+              color: 'white',
+            }}
+          >
+            <button
+              onClick={() => setShowCreateModal(false)}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                background: 'transparent',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                color: 'white',
+              }}
+              aria-label="Close modal"
+            >
+              &times;
+            </button>
+
+            <h3>Create New User</h3>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <UsernameChecker
+                onAvailabilityChange={handleUsernameAvailability}
+                setUsername={setUsername}
+              />
             </div>
-            {message && <div style={{ color: 'red', marginBottom: '20px' }}>{message}</div>}
-            {selectedUser && (
-                <div style={{ border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
-                    <h2>User: {selectedUser.username}</h2>
-                    <label>Travel Preference</label>
-                    <input 
-                        type="number" 
-                        value={travelPreference} 
-                        onChange={e => setTravelPreference(e.target.value)} 
-                        style={{ display: 'block', marginTop: '10px', marginBottom: '10px', padding: '5px', width: '100px' }}
-                    />
-                    <button onClick={handleUpdatePreferences} style={{ padding: '5px 15px' }}>Update Preferences</button>
-                </div>
-            )}
-            <div>
-                <input 
-                    placeholder="New username..." 
-                    value={newUsername} 
-                    onChange={e => setNewUsername(e.target.value)} 
-                    style={{ marginRight: '10px', padding: '5px', width: '200px' }}
-                />
-                <button onClick={handleCreateUser} style={{ padding: '5px 15px' }}>Create User</button>
-            </div>
+
+            <PreferenceSlider active={false} />
+          </div>
         </div>
-    );
-}
+      )}
+    </div>
+  );
+};
+
+export default UsersPage;
