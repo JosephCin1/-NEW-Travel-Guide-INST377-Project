@@ -14,7 +14,7 @@ This web app is fully responsive and functional on Desktop browsers:
 
 ## Developer Manual
 
-For detailed technical documentation on installation, running, testing, and API references, see the [Developer Manual](./docs/DEVELOPER_MANUAL.md).
+For detailed technical documentation on installation, running, testing, and API references, see the [Developer Manual](DEVELOPER_MANUAL.md).
 
 ---
 
