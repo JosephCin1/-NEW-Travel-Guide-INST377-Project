@@ -1,85 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import UserSearchForm from './UserSearchForm';
+import UserDetailsForm from './UserDetailsForm';
+import {
+  checkUserExists,
+  getUserByUsername,
+  createUser,
+  updateUserPreferences
+} from '../../api/userApi';
+import './UserPage.css';
 
-const initialUsers = [
-    { username: 'john_doe', preferences: { travel: 8 } },
-    { username: 'jane_smith', preferences: { travel: 5 } }
-];
+const UserPage = () => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastSearchedUsername, setLastSearchedUsername] = useState('');
+  const navigate = useNavigate(); // Initialize useNavigate
 
-export default function UserManagementPage() {
-    const [users, setUsers] = useState(initialUsers);
-    const [searchUsername, setSearchUsername] = useState('');
-    const [newUsername, setNewUsername] = useState('');
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [travelPreference, setTravelPreference] = useState('');
-    const [message, setMessage] = useState('');
+  const PREFERENCE_KEYS = [
+    "outdoor", "activity_intensity", "cultural", "social", "budget",
+    "local_flavor", "touristy", "indoor", "eventful", "romantic"
+  ]; //
 
-    const handleUserLookup = () => {
-        const user = users.find(u => u.username === searchUsername.trim());
-        if (user) {
-            setSelectedUser(user);
-            setTravelPreference(user.preferences.travel);
-            setMessage('');
-        } else {
-            setMessage('User not found.');
-            setSelectedUser(null);
-        }
-    };
+  const handleLookupUser = async (username) => {
+    setIsLoading(true);
+    setMessage('');
+    setEditingUser(null);
+    setLastSearchedUsername(username);
 
-    const handleCreateUser = () => {
-        const trimmedUsername = newUsername.trim();
-        if (trimmedUsername === '' || users.some(u => u.username === trimmedUsername)) {
-            setMessage('Username is taken or invalid.');
-            return;
-        }
-        const newUser = { username: trimmedUsername, preferences: { travel: 0 } };
-        setUsers([...users, newUser]);
-        setNewUsername('');
-        setMessage(`User ${trimmedUsername} created successfully.`);
-    };
+    const { data, error } = await getUserByUsername(username);
+    if (error) {
+      setMessage(error.message || `Could not find user: ${username}.`);
+      setCurrentUser(null);
+    } else {
+      setCurrentUser(data);
+      setEditingUser(data);
+      setMessage(`User "${username}" found. You can now edit their preferences.`);
+    }
+    setIsLoading(false);
+  };
 
-    const handleUpdatePreferences = () => {
-        const updatedUsers = users.map(u => 
-            u.username === selectedUser.username ? { ...u, preferences: { travel: travelPreference } } : u
-        );
-        setUsers(updatedUsers);
-        setMessage(`Preferences updated for ${selectedUser.username}.`);
-    };
+  const handleCreateNewUser = async (username) => {
+    setIsLoading(true);
+    setMessage('');
+    setEditingUser(null);
+    setLastSearchedUsername(username);
 
-    return (
-        <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <div style={{ marginBottom: '20px' }}>
-                <input 
-                    placeholder="Search username..." 
-                    value={searchUsername} 
-                    onChange={e => setSearchUsername(e.target.value)} 
-                    style={{ marginRight: '10px', padding: '5px', width: '200px' }}
-                />
-                <button onClick={handleUserLookup} style={{ marginRight: '10px', padding: '5px 15px' }}>Lookup User</button>
-                <button onClick={handleCreateUser} style={{ padding: '5px 15px' }}>Create User</button>
-            </div>
-            {message && <div style={{ color: 'red', marginBottom: '20px' }}>{message}</div>}
-            {selectedUser && (
-                <div style={{ border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
-                    <h2>User: {selectedUser.username}</h2>
-                    <label>Travel Preference</label>
-                    <input 
-                        type="number" 
-                        value={travelPreference} 
-                        onChange={e => setTravelPreference(e.target.value)} 
-                        style={{ display: 'block', marginTop: '10px', marginBottom: '10px', padding: '5px', width: '100px' }}
-                    />
-                    <button onClick={handleUpdatePreferences} style={{ padding: '5px 15px' }}>Update Preferences</button>
-                </div>
-            )}
-            <div>
-                <input 
-                    placeholder="New username..." 
-                    value={newUsername} 
-                    onChange={e => setNewUsername(e.target.value)} 
-                    style={{ marginRight: '10px', padding: '5px', width: '200px' }}
-                />
-                <button onClick={handleCreateUser} style={{ padding: '5px 15px' }}>Create User</button>
-            </div>
-        </div>
-    );
-}
+    const { exists, error: checkError } = await checkUserExists(username);
+    if (checkError) {
+      setMessage(`Error checking username: ${checkError.message}`);
+      setIsLoading(false);
+      return;
+    }
+    if (exists) {
+      setMessage(`Username "${username}" is already taken. Please choose another.`);
+      setIsLoading(false);
+      return;
+    }
+
+    const { data: newUser, error: createError } = await createUser(username);
+    if (createError) {
+      setMessage(`Failed to create user: ${createError.message}`);
+    } else {
+      setCurrentUser(newUser);
+      setEditingUser(newUser);
+      setMessage(`User "${username}" created successfully! Please set their preferences below.`);
+    }
+    setIsLoading(false);
+  };
+
+  const handleSaveChanges = async (userId, preferences) => {
+    setIsLoading(true);
+    setMessage('');
+    const { data: updatedUser, error } = await updateUserPreferences(userId, preferences);
+    if (error) {
+      setMessage(`Failed to update preferences: ${error.message}`);
+      setIsLoading(false); // Keep loading false on error
+    } else {
+      setCurrentUser(updatedUser);
+      // setEditingUser(updatedUser); // No longer needed if navigating away
+      setMessage('Preferences updated successfully! Redirecting...');
+      // Redirect after a short delay to allow the user to see the success message
+      setTimeout(() => {
+        navigate('/'); // Navigate to the main page (assuming '/' is your main page route)
+      }, 1500); // 1.5 seconds delay
+    }
+    // setIsLoading(false); // Will be false after navigation or if already set in error block
+  };
+
+  const handleCancelEdit = () => {
+    if (currentUser && editingUser && currentUser.user_id === editingUser.user_id) {
+        setEditingUser(currentUser);
+    } else {
+        setEditingUser(null);
+    }
+     setMessage(currentUser ? `Editing cancelled for ${editingUser?.username}. User ${currentUser.username} details are shown.` : 'Editing cancelled.');
+  };
+
+
+  return (
+    <div className="user-page-container">
+      <h2>User Management</h2>
+      <UserSearchForm
+        onLookup={handleLookupUser}
+        onCreate={handleCreateNewUser}
+        loading={isLoading}
+      />
+      {message && <p className={`user-page-message ${message.includes('Failed') || message.includes('Error') || message.includes('Could not find') || message.includes('taken') ? 'error-message' : 'success-message'}`}>{message}</p>}
+
+      {editingUser && (
+        <UserDetailsForm
+          user={editingUser}
+          onSave={handleSaveChanges}
+          onCancel={() => {
+            setEditingUser(null);
+            setMessage(currentUser && currentUser.username === editingUser.username ? `Changes cancelled. Displaying current details for ${currentUser.username}.` : 'Editor closed.');
+          }}
+          loading={isLoading}
+        />
+      )}
+    </div>
+  );
+};
+
+export default UserPage;

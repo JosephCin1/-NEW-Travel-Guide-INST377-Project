@@ -6,7 +6,6 @@ import SearchPage from './pages/MainSearch/SearchPage';
 import AboutPage from './pages/About/AboutPage';
 import UserPage from './pages/User/UserPage';
 import SearchResults from './pages/SearchResults/SearchResults';
-import DestinationsPage from './pages/Destinations/DestinationsPage';
 import InteractiveSearchResults from './pages/InteractiveSearch/InteractiveSearchResults';
 import LookupSearchPage from './pages/LookupSearch/LookupSearchPage';
 import Navbar from './components/Navbar/Navbar';
@@ -43,10 +42,9 @@ export default function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/user" element={<UserPage />} />
             <Route path="/interactive_search" element={<InteractiveSearchResults />} />
-            <Route path="/destinations" element={<DestinationsPage />} />
             <Route path="/search_results" element={<SearchResults />} />
             <Route path="/lookup-search" element={<LookupSearchPage />} /> 
-
+            <Route path="/users" element={<UserPage />} />
             {/* Add other routes as needed */}
           </Routes>
         </div>
