@@ -1,4 +1,3 @@
-// src/components/GooglePlacesSearch.js
 import React, { useState, useRef } from 'react';
 import { Autocomplete } from '@react-google-maps/api';
 

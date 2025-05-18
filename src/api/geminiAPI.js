@@ -1,4 +1,3 @@
-// src/api/geminiApi.js
 import axios from 'axios';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY; 
@@ -69,16 +68,10 @@ export const fetchPersonalizedRecommendationsFromLLM = async (destination, userP
       parts: [{ "text": prompt }]
     }],
     generationConfig: {
-      responseMimeType: "application/json", // Crucial: Ask the model to output JSON formatted text
+      responseMimeType: "application/json", 
       temperature: 0.7,
-      maxOutputTokens: 2048, // Adjust as needed based on expected response size
+      maxOutputTokens: 2048, 
     },
-    // safetySettings: [ // Optional: Adjust as needed
-    //   { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-    //   { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-    //   { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-    //   { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-    // ]
   };
 
   try {
@@ -92,7 +85,6 @@ export const fetchPersonalizedRecommendationsFromLLM = async (destination, userP
     if (response.data && response.data.candidates && response.data.candidates.length > 0) {
       const candidate = response.data.candidates[0];
       if (candidate.finishReason && candidate.finishReason !== "STOP" && candidate.finishReason !== "MAX_TOKENS") {
-        // Log or handle other finish reasons like "SAFETY", "RECITATION", etc.
         console.warn("LLM generation finished with reason:", candidate.finishReason, candidate.safetyRatings);
         const safetyIssues = (candidate.safetyRatings || []).filter(r => r.blocked).map(r => r.category).join(', ');
         throw new Error(`AI response incomplete or blocked. Reason: ${candidate.finishReason}.${safetyIssues ? ' Categories: ' + safetyIssues : ''}`);
@@ -101,7 +93,6 @@ export const fetchPersonalizedRecommendationsFromLLM = async (destination, userP
       if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
         let llmResponseText = candidate.content.parts[0].text;
 
-        // Basic cleanup for markdown ```json ... ``` if present (though responseMimeType should prevent this)
         if (llmResponseText.startsWith("```json")) {
           llmResponseText = llmResponseText.substring(7, llmResponseText.length - 3).trim();
         } else if (llmResponseText.startsWith("```")) {
@@ -112,12 +103,12 @@ export const fetchPersonalizedRecommendationsFromLLM = async (destination, userP
           let parsedSuggestions = JSON.parse(llmResponseText);
           if (!Array.isArray(parsedSuggestions)) {
              if (typeof parsedSuggestions === 'object' && parsedSuggestions !== null && parsedSuggestions.placeName) {
-                  parsedSuggestions = [parsedSuggestions]; // Handle if LLM returns a single object
+                  parsedSuggestions = [parsedSuggestions]; 
               } else {
                   throw new Error("LLM response, once parsed, was not an array of suggestions as requested.");
               }
           }
-          return parsedSuggestions.slice(0, 10); // Return up to 10 suggestions
+          return parsedSuggestions.slice(0, 10);
         } catch (parseError) {
           console.error("Error parsing LLM JSON response:", parseError, "Raw text was:", llmResponseText);
           throw new Error("AI response was not in the expected JSON format. Check console for raw text.");

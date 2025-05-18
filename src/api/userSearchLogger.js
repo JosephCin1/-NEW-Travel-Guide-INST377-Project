@@ -1,4 +1,3 @@
-// src/api/userSearchLogger.js
 import { supabase } from './supabaseClient'; // Or 'src/api/supabaseClient'
 
 export const logUserSearch = async ({ userId, destination, preferences }) => {
@@ -6,12 +5,6 @@ export const logUserSearch = async ({ userId, destination, preferences }) => {
     console.error('User ID, destination name, and preferences are required to log user search.');
     return { search_id: null, error: { message: 'User ID, destination name, and preferences are required.' } };
   }
-
-  // Prepare coordinates for storage. Adjust based on your 'coordinates' column type (e.g., point, jsonb, float4[])
-  // Assuming a jsonb format like { "longitude": lng, "latitude": lat } or a PostGIS point string.
-  // If your column is `point`, format might be `(longitude,latitude)`.
-  // If it's `float4[]`, it would be [longitude, latitude].
-  // For this example, let's assume you want to store it as JSONB.
   let dbCoordinates = null;
   if (destination.coordinates) {
     if (Array.isArray(destination.coordinates) && destination.coordinates.length === 2) {
@@ -22,13 +15,12 @@ export const logUserSearch = async ({ userId, destination, preferences }) => {
   }
 
   const searchRecord = {
-    // user_id is not in the 'user_searches' schema you provided, so omitting. If needed, add it.
     location_name: destination.name,
-    city_name: destination.city || null, // Assuming city might be optional in destination object
-    country: destination.country || null, // Assuming country might be optional
+    city_name: destination.city || null, 
+    country: destination.country || null,
     coordinates: dbCoordinates,
     outdoor: preferences.outdoor,
-    activity_intens: preferences.activity_intensity, // Ensure preference key matches schema
+    activity_intens: preferences.activity_intensity,
     cultural: preferences.cultural,
     social: preferences.social,
     budget: preferences.budget,

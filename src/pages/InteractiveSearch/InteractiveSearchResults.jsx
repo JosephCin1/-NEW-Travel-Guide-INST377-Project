@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import './InteractiveSearchResults.css'; //
 import { supabase } from 'src/api/supabaseClient'; //
 
-// Updated fetchUserData function to use Supabase
 const fetchUserData = async (usernameToFind) => {
   console.log(`Workspaceing data from Supabase for username: ${usernameToFind}`);
   try {
@@ -36,7 +35,6 @@ const fetchUserData = async (usernameToFind) => {
 const InteractiveSearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // Corrected line: Reverted to use location.state?.location
   const destinationData = location.state?.location;
   const initialUsername = location.state?.username || '';
 
@@ -50,7 +48,6 @@ const InteractiveSearchResults = () => {
   useEffect(() => {
     if (!destinationData) {
       console.log('No destination data received in InteractiveSearchResults. Check navigation state from SearchPage.');
-      // navigate('/'); // Example redirect
     }
   }, [destinationData, navigate]);
 
@@ -91,7 +88,6 @@ const InteractiveSearchResults = () => {
     setIsConfirmationModalOpen(false);
     navigate('/search_results', {
       state: {
-        // Ensure the key used here ('destination') matches what '/search_results' page expects
         destination: destinationData,
         user: userData,
         preferences: userData

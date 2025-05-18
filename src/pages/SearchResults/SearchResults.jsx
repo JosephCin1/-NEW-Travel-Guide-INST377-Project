@@ -1,4 +1,3 @@
-// src/pages/SearchResults/SearchResults.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import './SearchResults.css';
@@ -7,7 +6,7 @@ import { resolveAndStorePlaceSuggestions } from 'src/api/poiSupabaseApi.js';
 import { logUserSearch } from 'src/api/userSearchLogger';
 import { logSearchMatches } from 'src/api/matchLogger';
 
-const preferenceCategories = [ // These should be the keys expected in the characteristics object for logSearchMatches
+const preferenceCategories = [
   "outdoor", "activity_intensity", "cultural", "social", "budget",
   "local_flavor", "touristy", "indoor", "eventful", "romantic"
 ];
@@ -34,15 +33,10 @@ const SearchResults = () => {
   const [llmError, setLlmError] = useState(null);
   const [selectedLlmItemData, setSelectedLlmItemData] = useState(null);
   const [currentSearchId, setCurrentSearchId] = useState(null);
-  // const hasRunEffectRef = useRef(false); // For debugging duplicate useEffect runs if needed
 
   const mapRef = useRef(null);
 
   useEffect(() => {
-    // if (hasRunEffectRef.current && import.meta.env.DEV) { // Debugging for strict mode
-    //   console.log("Effect run skipped by ref");
-    //   return;
-    // }
 
     const loadAndProcessRecommendations = async () => {
       const preferencesSource = user && user.preferences ? user.preferences : user;
@@ -67,22 +61,12 @@ const SearchResults = () => {
         setIsLoadingLlm(true);
         setLlmError(null);
         setLlmSuggestions([]);
-        // We only set currentSearchId once after a successful logUserSearch
-        // If this useEffect runs again due to StrictMode and currentSearchId is already set,
-        // logUserSearch might be called again if we don't guard it or reset currentSearchId.
-        // For StrictMode, it's often best to ensure the logged function is robust or accept the dev-only double call.
-        // Resetting here means if deps change, we try to log again.
-        // setCurrentSearchId(null); // Let's remove this premature reset. currentSearchId acts as a guard.
 
 
         try {
-          let newSearchId = currentSearchId; // Use existing if available and valid for current context
-                                           // This simple assignment might not be enough if user/dest changes
-                                           // and we intend a new search log.
+          let newSearchId = currentSearchId;
 
-          // Only log user search if we haven't done it yet for this particular user/destination context
-          // or if currentSearchId is null. This is a simple guard.
-          if (!newSearchId) { // A more robust check might involve comparing against previous user/destination
+          if (!newSearchId) {
             const userPrefsForLogging = {};
             preferenceCategories.forEach(catKey => {
               const schemaKey = catKey === 'activity_intensity' ? 'activity_intens' : catKey;
@@ -112,7 +96,7 @@ const SearchResults = () => {
               return;
             }
             newSearchId = loggedSearchId;
-            setCurrentSearchId(newSearchId); // Set it only after successful logging
+            setCurrentSearchId(newSearchId);
           }
           
           const rawLlmSuggestions = await fetchPersonalizedRecommendationsFromLLM(destination, user);
@@ -129,23 +113,14 @@ const SearchResults = () => {
             
             setLlmSuggestions(sortedSuggestions);
 
-            if (newSearchId && sortedSuggestions.length > 0) { // Ensure newSearchId is available
+            if (newSearchId && sortedSuggestions.length > 0) { 
               const matchesToLog = sortedSuggestions.map(item => {
                 const characteristicsForMatch = {};
                 let allRequiredCharacteristicsPresent = true;
 
-                // preferenceCategories should contain keys like 'activity_intensity'
                 preferenceCategories.forEach(pCatKey => {
-                  let keyOnItem = pCatKey; // e.g. 'activity_intensity'
-                  // Check if item has 'activity_intensity' or 'activity_intens'
-                  if (pCatKey === 'activity_intensity') {
-                    if (item.hasOwnProperty('activity_intensity')) keyOnItem = 'activity_intensity';
-                  }
-                  // Add other similar mappings if item keys vary from preferenceCategories
-
+                  let keyOnItem = pCatKey; 
                   if (item.hasOwnProperty(keyOnItem) && typeof item[keyOnItem] === 'number') {
-                    // Store using the key from preferenceCategories (e.g. 'activity_intensity')
-                    // as logSearchMatches expects this for its internal mapping to DB schema (e.g. to 'activity_intens')
                     characteristicsForMatch[pCatKey] = item[keyOnItem];
                   } else {
                     allRequiredCharacteristicsPresent = false;
@@ -195,7 +170,6 @@ const SearchResults = () => {
           setLlmError(error.message || "An unknown error occurred while fetching AI recommendations.");
         } finally {
           setIsLoadingLlm(false);
-          // if (import.meta.env.DEV) hasRunEffectRef.current = true; // For strict mode debugging
         }
       } else {
         let missingInfoError = "";
@@ -211,7 +185,6 @@ const SearchResults = () => {
       }
     };
 
-    // Guard against re-running if API key isn't set.
     if (!import.meta.env.VITE_GEMINI_API_KEY) {
         setLlmError("AI features are unavailable: Gemini API Key not configured.");
         setIsLoadingLlm(false);
@@ -219,10 +192,8 @@ const SearchResults = () => {
     }
     
     loadAndProcessRecommendations();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [destination, user]); // IMPORTANT: Ensure 'destination' and 'user' are stable references.
+  }, [destination, user]);
 
-  // ... (rest of the component: API key check, initial guards, JSX rendering)
   if (!import.meta.env.VITE_GEMINI_API_KEY) {
      return (
       <div className="page-container">
@@ -255,7 +226,7 @@ const SearchResults = () => {
 
       {isLoadingLlm && (
         <div className="loading-indicator">
-          <p>🧠 Our AI is crafting and checking your personalized suggestions... this may take a moment!</p>
+          <p>...Our AI is crafting and checking your personalized suggestions... this may take a moment!</p>
         </div>
       )}
       {llmError && <p className="error-message">{llmError}</p>}
@@ -269,7 +240,7 @@ const SearchResults = () => {
           <h3>AI-Powered Suggestions:</h3>
           <ul className="places-list">
             {llmSuggestions.map((item, index) => (
-              <li key={item.place_id || (item.placeName || `place-${index}`) } className="place-item"> {/* Use item.place_id for key */}
+              <li key={item.place_id || (item.placeName || `place-${index}`) } className="place-item">
                 <h4>{index + 1}. {item.placeName}</h4>
                 <p>
                   <strong>AI Match Score:</strong> {item.match_score !== undefined ? item.match_score : (item.matchScore !== undefined ? item.matchScore : 'N/A')}/100

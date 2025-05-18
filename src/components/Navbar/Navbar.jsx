@@ -44,7 +44,6 @@ const Navbar = () => {
               Lookup Search
             </Link>
           </li>
-          {/* Add more links as needed */}
         </ul>
       </div>
     </nav>

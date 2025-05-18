@@ -1,4 +1,3 @@
-// src/pages/AboutPage.jsx
 import React from 'react';
 
 export default function AboutPage() {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom'; 
 import UserSearchForm from './UserSearchForm';
 import UserDetailsForm from './UserDetailsForm';
 import {
@@ -16,7 +16,7 @@ const UserPage = () => {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [lastSearchedUsername, setLastSearchedUsername] = useState('');
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate(); 
 
   const PREFERENCE_KEYS = [
     "outdoor", "activity_intensity", "cultural", "social", "budget",
@@ -76,17 +76,14 @@ const UserPage = () => {
     const { data: updatedUser, error } = await updateUserPreferences(userId, preferences);
     if (error) {
       setMessage(`Failed to update preferences: ${error.message}`);
-      setIsLoading(false); // Keep loading false on error
+      setIsLoading(false); 
     } else {
       setCurrentUser(updatedUser);
-      // setEditingUser(updatedUser); // No longer needed if navigating away
       setMessage('Preferences updated successfully! Redirecting...');
-      // Redirect after a short delay to allow the user to see the success message
       setTimeout(() => {
-        navigate('/'); // Navigate to the main page (assuming '/' is your main page route)
-      }, 1500); // 1.5 seconds delay
+        navigate('/'); 
+      }, 1500); 
     }
-    // setIsLoading(false); // Will be false after navigation or if already set in error block
   };
 
   const handleCancelEdit = () => {

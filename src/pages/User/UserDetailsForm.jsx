@@ -35,15 +35,14 @@ const UserDetailsForm = ({ user, onSave, onCancel, loading }) => {
   const handleSave = () => {
     const prefsToSave = {};
     PREFERENCE_KEYS.forEach(key => {
-        // Convert empty strings to null for the database, otherwise parse as int
         prefsToSave[key] = preferences[key] === '' ? null : parseInt(preferences[key], 10);
     });
     onSave(user.user_id, prefsToSave);
   };
 
   const handleCancel = () => {
-    setPreferences(originalPreferences); // Reset to original/last saved values
-    if(onCancel) onCancel(); // Propagate cancel if needed by parent
+    setPreferences(originalPreferences); 
+    if(onCancel) onCancel(); 
   }
 
   if (!user) return null;

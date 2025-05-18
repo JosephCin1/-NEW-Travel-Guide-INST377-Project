@@ -1,4 +1,3 @@
-// src/api/poiSupabaseApi.js
 import { supabase } from './supabaseClient';
 
 const preferenceCategories = [
@@ -7,7 +6,6 @@ const preferenceCategories = [
 ];
 
 const calculateUserMatchScore = (placeData, userPreferences) => {
-  // This function remains the same as your last version
   if (!userPreferences || !placeData) return 50;
   let totalWeightedSimilarity = 0;
   let totalMaxPossibleWeightedSimilarity = 0;
@@ -28,15 +26,12 @@ const calculateUserMatchScore = (placeData, userPreferences) => {
 };
 
 export const resolveAndStorePlaceSuggestions = async (suggestionsFromLLM, currentDestination, currentUser) => {
-  // currentUser here is the user object containing preferences
   if (!suggestionsFromLLM || suggestionsFromLLM.length === 0) return { data: [], error: null };
 
   const processedSuggestionsForDisplay = [];
   let errorsEncountered = [];
 
   for (const llmPlace of suggestionsFromLLM) { 
-    // llmPlace now contains placeName and categoryRatings (and optionally description)
-    // It does NOT contain a matchScore from the LLM.
     const derivedCityName = currentDestination.address?.city || 
                            (currentDestination.name.includes(',') ? currentDestination.name.split(',')[0].trim() : currentDestination.name);
     const derivedCountryName = currentDestination.address?.country || 
@@ -53,7 +48,6 @@ export const resolveAndStorePlaceSuggestions = async (suggestionsFromLLM, curren
       if (selectError) {
         console.error(`Error checking for existing place "${llmPlace.placeName}":`, selectError);
         errorsEncountered.push({ placeName: llmPlace.placeName, error: `DB check failed: ${selectError.message}` });
-        // Fallback: calculate score based on LLM's categoryRatings directly
         const fallbackMatchScore = calculateUserMatchScore(llmPlace.categoryRatings, currentUser);
         processedSuggestionsForDisplay.push({ 
             ...llmPlace, 
@@ -74,7 +68,6 @@ export const resolveAndStorePlaceSuggestions = async (suggestionsFromLLM, curren
           isFromDB: true
         });
       } else {
-        // Place does not exist, insert it (categoryRatings from LLM, no match_score in DB)
         const recordToInsert = {
           location_name: llmPlace.placeName,
           city_name: derivedCityName,
@@ -84,7 +77,6 @@ export const resolveAndStorePlaceSuggestions = async (suggestionsFromLLM, curren
           business_status: null,
           ratings: null,
           type: 'AI Suggestion',
-          // NO match_score here for the database insert
           ...(llmPlace.categoryRatings || {})
         };
         preferenceCategories.forEach(catKey => {
@@ -111,7 +103,6 @@ export const resolveAndStorePlaceSuggestions = async (suggestionsFromLLM, curren
           });
         } else {
           console.log(`Successfully inserted new place "${llmPlace.placeName}".`, newPlaceFromDB);
-          // Calculate match score for the newly inserted place using its (LLM-provided) category ratings
           const userSpecificMatchScore = calculateUserMatchScore(newPlaceFromDB, currentUser);
           processedSuggestionsForDisplay.push({
             ...newPlaceFromDB, 

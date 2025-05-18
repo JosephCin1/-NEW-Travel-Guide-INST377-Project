@@ -1,14 +1,13 @@
-// src/pages/LookupSearch/LookupSearchPage.jsx
 import React, { useState } from 'react';
-import { fetchSearchDetails, fetchArchivedSearchMatches } from '../../api/archivedSearchApi'; // Adjust path if needed
-import ArchivedSearchResultsDisplay from '../../components/ArchivedSearchResultsDisplay'; // Adjust path if needed
-import './LookupSearchPage.css'; // We'll create this for styling
+import { fetchSearchDetails, fetchArchivedSearchMatches } from '../../api/archivedSearchApi'; 
+import ArchivedSearchResultsDisplay from '../../components/ArchivedSearchResultsDisplay'; 
+import './LookupSearchPage.css'; 
 
 const LookupSearchPage = () => {
   const [searchIdInput, setSearchIdInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [retrievedSearchData, setRetrievedSearchData] = useState(null); // Will hold { details: {}, matches: [] }
+  const [retrievedSearchData, setRetrievedSearchData] = useState(null); 
 
   const handleInputChange = (e) => {
     setSearchIdInput(e.target.value);
@@ -39,22 +38,20 @@ const LookupSearchPage = () => {
       }
 
       const matchesResult = await fetchArchivedSearchMatches(parsedId);
-      // We can proceed even if matchesResult has an error, as details might still be useful.
       if (matchesResult.error) {
         console.error("Error fetching matches:", matchesResult.error);
-        // Optionally set a partial error message if needed, but details will still show.
         setError(prev => `${prev || ''} Note: Could not fetch all associated matches. ${matchesResult.error.message}`.trim());
       }
       
       setRetrievedSearchData({
         details: detailsResult.data,
-        matches: matchesResult.data || [] // Use empty array if matches are null or errored
+        matches: matchesResult.data || [] 
       });
 
     } catch (err) {
       console.error("Lookup failed:", err);
       setError(err.message || 'An unexpected error occurred during lookup.');
-      setRetrievedSearchData(null); // Ensure no partial data is shown on critical error
+      setRetrievedSearchData(null); 
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +65,7 @@ const LookupSearchPage = () => {
   };
 
   return (
-    <div className="lookup-search-page page-container"> {/* Assuming .page-container provides general padding/max-width */}
+    <div className="lookup-search-page page-container"> 
       <h1>Lookup Past Search</h1>
       {!retrievedSearchData && (
         <form onSubmit={handleLookup} className="lookup-form">
@@ -88,7 +85,7 @@ const LookupSearchPage = () => {
 
       {isLoading && <div className="loading-indicator">Loading search data...</div>}
       
-      {error && !retrievedSearchData?.details && ( // Show error prominently if no details could be fetched
+      {error && !retrievedSearchData?.details && ( 
         <div className="error-message lookup-error">
           <p>{error}</p>
           {retrievedSearchData && <button onClick={clearLookup}>Try another Search ID</button>}
@@ -99,10 +96,9 @@ const LookupSearchPage = () => {
         <ArchivedSearchResultsDisplay
           searchDetails={retrievedSearchData.details}
           fetchedMatches={retrievedSearchData.matches}
-          onClearLookup={clearLookup} // Pass the clear function
+          onClearLookup={clearLookup} 
         />
       )}
-       {/* Display partial error message if details were fetched but matches had issues */}
       {error && retrievedSearchData?.details && error.includes("Could not fetch all associated matches") && (
         <div className="error-message lookup-error" style={{marginTop: '20px'}}>
             <p>{error}</p>
