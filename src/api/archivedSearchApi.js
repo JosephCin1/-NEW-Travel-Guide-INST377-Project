@@ -22,7 +22,7 @@ export const fetchSearchDetails = async (searchId) => {
     if (error) {
       return { data: null, error: { message: `Could not fetch details for search ID: ${id}.` } };
     }
-    return { data, error: null }; // error should be null if data is present from .single() without issues
+    return { data, error: null };
   } catch (e) {
     return { data: null, error: { message: 'An unexpected error occurred.' } };
   }
@@ -60,13 +60,44 @@ export const fetchArchivedSearchMatches = async (searchId) => {
       const { points_of_interest, ...restOfMatch } = match;
       return {
         ...restOfMatch,
-        placeName: points_of_interest?.location_name || 'N/A', 
-        id: points_of_interest?.place_id || match.place_id,
+        placeName: points_of_interest?.location_name || 'N/A',
+        place_id: match.place_id || points_of_interest?.place_id,
+        id: match.match_id || points_of_interest?.place_id || match.place_id
       };
     });
 
     return { data: transformedData, error: null };
   } catch (e) {
     return { data: null, error: { message: 'An error occurred while fetching matches.' } };
+  }
+};
+
+/**
+ * Fetches details for a specific point_of_interest by its place_id.
+ * @param {number | string} placeId - The ID of the point of interest to fetch.
+ * @returns {Promise<{ data: object | null, error: object | null }>}
+ */
+export const fetchPointOfInterestDetails = async (placeId) => {
+  const id = parseInt(placeId);
+  if (isNaN(id) || id <= 0) { 
+    return { data: null, error: { message: 'Invalid Place ID provided.' } };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('points_of_interest')
+      .select('*') 
+      .eq('place_id', id)
+      .single(); 
+
+    if (error) {
+      const message = error.code === 'PGRST116' 
+        ? `Point of Interest with ID ${id} not found.`
+        : `Could not fetch Point of Interest details.`;
+      return { data: null, error: { message, details: error } };
+    }
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: { message: 'An unexpected error occurred while fetching Point of Interest details.' } };
   }
 };
