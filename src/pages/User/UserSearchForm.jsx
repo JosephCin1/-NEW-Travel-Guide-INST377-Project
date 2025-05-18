@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './UserPage.jsx'; // We'll create this for styling
+import './UserPage.jsx'; 
 
 const UserSearchForm = ({ onLookup, onCreate, loading }) => {
   const [username, setUsername] = useState('');

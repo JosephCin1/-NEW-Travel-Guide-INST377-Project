@@ -1,9 +1,8 @@
-/* src/pages/SearchResults/SearchResults.css */
 .search-results-page h2, .search-results-page h3 {
   color: #333;
-  text-align: center; /* Center titles */
+  text-align: center; 
 }
-.search-results-page > p { /* Target direct p children for main description */
+.search-results-page > p { 
   text-align: center;
   margin-bottom: 25px;
 }
@@ -84,7 +83,6 @@
   text-align: center;
 }
 
-/* Modal Styles (re-include or ensure they are global) */
 .modal-overlay-sr {
   position: fixed;
   top: 0;
@@ -105,7 +103,7 @@
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   width: 90%;
-  max-width: 750px; /* Slightly wider for potentially more data */
+  max-width: 750px;
   max-height: 85vh;
   overflow: auto;
   display: flex;
@@ -125,7 +123,7 @@
   padding: 15px;
   border-radius: 4px;
   overflow-x: auto;
-  font-size: 0.875em; /* Monospace font typically used by pre */
+  font-size: 0.875em;
   line-height: 1.5;
   flex-grow: 1;
   min-height: 200px;

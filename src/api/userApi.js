@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient'; //
+import { supabase } from './supabaseClient'; 
 
 const PREFERENCE_KEYS = [
   "outdoor", "activity_intensity", "cultural", "social", "budget",
@@ -21,7 +21,7 @@ export const checkUserExists = async (username) => {
       .eq('username', username)
       .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found, which is fine here
+    if (error && error.code !== 'PGRST116') { // PGRST116 is for no data found
       console.error('Error checking user existence:', error);
       return { exists: false, error };
     }
@@ -44,9 +44,9 @@ export const getUserByUsername = async (username) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('*') // Select all columns, including preferences
+      .select('*')
       .eq('username', username)
-      .single(); // Expecting only one user or null
+      .single();
 
     if (error && error.code === 'PGRST116') {
       return { data: null, error: { message: `User "${username}" not found.`} };
@@ -72,7 +72,7 @@ export const createUser = async (username) => {
   }
 
   const initialPreferences = PREFERENCE_KEYS.reduce((acc, key) => {
-    acc[key] = null; // Or a default value like 5 if you prefer
+    acc[key] = null; 
     return acc;
   }, {});
 
@@ -108,11 +108,10 @@ export const updateUserPreferences = async (userId, preferences) => {
   PREFERENCE_KEYS.forEach(key => {
     if (preferences.hasOwnProperty(key)) {
       const value = parseInt(preferences[key], 10);
-      // Ensure preferences are within a 1-10 range, or handle as needed
       if (!isNaN(value) && value >= 1 && value <= 10) {
         validPreferences[key] = value;
       } else {
-        validPreferences[key] = null; // Or keep existing, or error
+        validPreferences[key] = null;
       }
     }
   });

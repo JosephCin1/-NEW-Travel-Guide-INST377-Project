@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './SearchPage.css'; // We'll create this for modal and basic styling
+import './SearchPage.css'; 
 
 const SearchPage = () => {
   const [locationInput, setLocationInput] = useState('');
@@ -26,9 +26,6 @@ const SearchPage = () => {
     setError(null);
     setGeocodedResults(null);
 
-    // --- Geocoding API Call ---
-    // Using OpenStreetMap Nominatim API
-    // Docs: https://nominatim.org/release-docs/latest/api/Search/
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationInput)}&format=json&limit=5&addressdetails=1`;
 
     try {
@@ -43,8 +40,6 @@ const SearchPage = () => {
       const data = await response.json();
 
       if (data && data.length > 0) {
-        // For simplicity, we'll present the first few results if many are returned.
-        // You might want more sophisticated disambiguation if multiple results are common.
         setGeocodedResults(data);
         setIsModalOpen(true);
       } else {
@@ -60,16 +55,14 @@ const SearchPage = () => {
 
   const handleConfirmLocation = (confirmedLocation) => {
     setIsModalOpen(false);
-    // Pass the confirmed location data to the interactive search page
-    // We're passing latitude, longitude, and display name. Adjust as needed.
     navigate('/interactive_search', {
       state: {
         location: {
           name: confirmedLocation.display_name,
           lat: parseFloat(confirmedLocation.lat),
           lon: parseFloat(confirmedLocation.lon),
-          boundingBox: confirmedLocation.boundingbox, // [south, north, west, east]
-          address: confirmedLocation.address // Detailed address components
+          boundingBox: confirmedLocation.boundingbox,
+          address: confirmedLocation.address
         }
       }
     });
@@ -77,7 +70,7 @@ const SearchPage = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setGeocodedResults(null); // Clear results if modal is dismissed
+    setGeocodedResults(null);
   };
 
   return (
@@ -116,7 +109,7 @@ const SearchPage = () => {
               <>
                 <p>We found a few possible matches. Please select the correct one:</p>
                 <ul className="location-options-list">
-                  {geocodedResults.slice(0, 5).map((result) => ( // Show top 5 results
+                  {geocodedResults.slice(0, 5).map((result) => (
                     <li key={result.place_id} className="location-option">
                       <p><strong>{result.display_name}</strong></p>
                       <p><small>Type: {result.type}{result.address?.country ? `, ${result.address.country}` : ''}</small></p>

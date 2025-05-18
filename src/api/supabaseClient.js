@@ -10,29 +10,23 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// GET username FROM SupaBASE
-// takes inputUsername and runs through the column to check
 export const fetchUsername = async (inputUsername) => {
     const { data, error } = await supabase
         .from('users')
         .select('username')
         .eq('username', inputUsername)
-        .maybeSingle(); 
-    //if input cant reach, console log pop
+        .maybeSingle();
+
     if (error) {
-    console.error('Error fetching data:', error);
-    return null;
-    } else {
-    // if inputUsername exists then console log taken and return false
+        console.error('Error fetching data:', error);
+        return null; 
+    }
     if (data) {
         console.log('Username already taken:', inputUsername);
         return false;
-    // if inputUsername does not exist, console log yay and return true
-    } else {
-        console.log('Username is available!');
-        return true;
     }
-    }
+    console.log('Username is available!');
+    return true;
 };
 export const postUsername = async (newData) => {
   const { data, error } = await supabase
@@ -49,7 +43,6 @@ export const postUsername = async (newData) => {
 };
 
 export const postPreferences = async (newDataArray) => {
-  // newDataArray should be an array of objects
   const { data, error } = await supabase
     .from('users')
     .insert(newDataArray)

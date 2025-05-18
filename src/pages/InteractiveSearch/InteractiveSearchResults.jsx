@@ -1,43 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './InteractiveSearchResults.css'; //
-import { supabase } from 'src/api/supabaseClient'; //
+import './InteractiveSearchResults.css'; 
+import { supabase } from 'src/api/supabaseClient';
 
-// Updated fetchUserData function to use Supabase
 const fetchUserData = async (usernameToFind) => {
-  console.log(`Workspaceing data from Supabase for username: ${usernameToFind}`);
+  const trimmedUsername = usernameToFind.trim();
+  if (!trimmedUsername) {
+    return { data: null, error: { message: 'Username cannot be empty.' } };
+  }
+
   try {
     const { data, error, status } = await supabase
       .from('users')
       .select('*')
-      .eq('username', usernameToFind)
+      .eq('username', trimmedUsername)
       .single();
 
     if (error) {
-      if (status === 406 || (error.details && error.details.includes("0 rows"))) {
-        return { success: false, message: `User "${usernameToFind}" not found.` };
-      }
-      console.error('Supabase lookup error:', error);
-      return { success: false, message: `Database error: ${error.message}` };
+      const message = (status === 406 || error.code === 'PGRST116')
+        ? `User "${trimmedUsername}" not found.`
+        : `Database error.`; 
+      return { data: null, error: { message } };
     }
-
-    if (data) {
-      return { success: true, data: data };
-    } else {
-      return { success: false, message: `User "${usernameToFind}" not found.` };
-    }
+    return { data, error: null };
   } catch (err) {
-    console.error("Unexpected error fetching user data:", err);
-    return { success: false, message: "An unexpected error occurred while fetching user data." };
+    return { data: null, error: { message: "An unexpected error occurred." } };
   }
 };
 
+const renderUserDetails = (user) => {
+  if (!user) return null;
+  return Object.entries(user)
+    .map(([key, value]) => {
+      if (key === 'user_id' || key === 'created_at' || typeof value === 'object' || Array.isArray(value)) {
+        return null;
+      }
+      const displayKey = key.replace(/_/g, ' '); 
+      return (
+        <p key={key} className="user-detail-item">
+          <strong>{displayKey}:</strong> {String(value)}
+        </p>
+      );
+    })
+    .filter(Boolean);
+};
 
 const InteractiveSearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // Corrected line: Reverted to use location.state?.location
-  const destinationData = location.state?.location;
+  const destinationData = location.state?.location || {};
   const initialUsername = location.state?.username || '';
 
   const [usernameInput, setUsernameInput] = useState(initialUsername);
@@ -47,16 +58,10 @@ const InteractiveSearchResults = () => {
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [showRegisterButton, setShowRegisterButton] = useState(false);
 
-  useEffect(() => {
-    if (!destinationData) {
-      console.log('No destination data received in InteractiveSearchResults. Check navigation state from SearchPage.');
-      // navigate('/'); // Example redirect
-    }
-  }, [destinationData, navigate]);
 
   const handleUsernameChange = (e) => {
     setUsernameInput(e.target.value);
-    setUserError(null);
+    setUserError(null); 
     setShowRegisterButton(false);
   };
 
@@ -71,16 +76,15 @@ const InteractiveSearchResults = () => {
     setUserError(null);
     setUserData(null);
     setShowRegisterButton(false);
-    setIsConfirmationModalOpen(false);
 
-    const response = await fetchUserData(usernameInput.trim());
+    const { data, error } = await fetchUserData(usernameInput);
 
-    if (response.success) {
-      setUserData(response.data);
+    if (data) {
+      setUserData(data);
       setIsConfirmationModalOpen(true);
-    } else {
-      setUserError(response.message || "Failed to find user.");
-      if (response.message && response.message.toLowerCase().includes("not found")) {
+    } else if (error) {
+      setUserError(error.message || "Failed to find user.");
+      if (error.message && error.message.toLowerCase().includes("not found")) {
         setShowRegisterButton(true);
       }
     }
@@ -89,87 +93,56 @@ const InteractiveSearchResults = () => {
 
   const handleFinalConfirmation = () => {
     setIsConfirmationModalOpen(false);
-    navigate('/search_results', {
-      state: {
-        // Ensure the key used here ('destination') matches what '/search_results' page expects
-        destination: destinationData,
-        user: userData,
-        preferences: userData
-      }
-    });
+    if (userData && destinationData?.name) { 
+      navigate('/search_results', {
+        state: {
+          destination: destinationData,
+          user: userData,
+          preferences: userData
+        }
+      });
+    } else {
+      setUserError("Missing data to proceed. Please try again."); 
+    }
   };
 
-  const handleCloseConfirmationModal = () => {
-    setIsConfirmationModalOpen(false);
-  };
+  const handleCloseConfirmationModal = () => setIsConfirmationModalOpen(false);
+  const navigateToUserPage = () => navigate('/users');
 
-  const navigateToUserPage = () => {
-    navigate('/users');
-  };
-
-  if (!destinationData) {
+  if (!destinationData?.name) {
     return (
       <div className="page-container">
         <h2>Interactive Search</h2>
-        <p>No destination selected. Please go back to the search page and choose a destination.</p>
-        <button onClick={() => navigate('/')}>Go to Search</button>
+        <p>No destination selected. Please go back and choose a destination.</p>
+        <button onClick={() => navigate('/')}>Go to Search Page</button>
       </div>
     );
   }
 
-  const renderUserDetails = (user) => {
-    if (!user) return null;
-    return Object.entries(user).map(([key, value]) => {
-      if (key === 'user_id' || key === 'created_at') return null;
-      const displayKey = key.replace(/_/g, ' ').charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        return (
-          <div key={key} className="user-detail-nested">
-            <strong>{displayKey}:</strong>
-            <div style={{ paddingLeft: '15px' }}>
-              {renderUserDetails(value)}
-            </div>
-          </div>
-        );
-      } else if (Array.isArray(value)) {
-         return (
-          <p key={key} className="user-detail-item">
-            <strong>{displayKey}:</strong> {value.join(', ')}
-          </p>
-        );
-      }
-      return (
-        <p key={key} className="user-detail-item">
-          <strong>{displayKey}:</strong> {String(value)}
-        </p>
-      );
-    });
-  };
-
   return (
     <div className="page-container interactive-search-container">
-      <h2>Interactive Search for: {destinationData?.name || 'your destination'}</h2>
+      <h2>Interactive Search for: {destinationData.name}</h2>
 
       <form onSubmit={handleUsernameSubmit} className="username-form">
-        <h3>Enter Your Username to Personalize</h3>
-        <label htmlFor="username">Username:</label>
+        <h3>Enter Username for Personalized Results</h3>
         <input
           type="text"
           id="username"
           value={usernameInput}
           onChange={handleUsernameChange}
-          placeholder="Enter your username"
+          placeholder="Your username"
           disabled={isLoadingUser}
+          aria-label="Username"
         />
         <button type="submit" disabled={isLoadingUser}>
-          {isLoadingUser ? 'Looking up...' : 'Lookup User'}
+          {isLoadingUser ? 'Searching...' : 'Find User'}
         </button>
         {userError && (
           <div className="user-message-container">
             <p className="error-message">{userError}</p>
             {showRegisterButton && (
               <button type="button" onClick={navigateToUserPage} className="register-button-inline action-button">
-                Create User
+                Create New User
               </button>
             )}
           </div>
@@ -179,25 +152,19 @@ const InteractiveSearchResults = () => {
       {isConfirmationModalOpen && userData && (
         <div className="modal-overlay">
           <div className="modal-content confirmation-modal">
-            <h3>Confirm Your Details</h3>
+            <h3>Confirm Details</h3>
             <div className="confirmation-details">
               <h4>Destination:</h4>
-              <p>{destinationData?.name || 'N/A'}</p>
-              {(destinationData?.address?.city || destinationData?.city) &&
-                <p><small>City: {destinationData?.address?.city || destinationData?.city}</small></p>}
-              {(destinationData?.address?.country || destinationData?.country) &&
-                <p><small>Country: {destinationData?.address?.country || destinationData?.country}</small></p>}
-              <hr style={{margin: "15px 0"}}/>
-              <h4>User Details:</h4>
+              <p>{destinationData.name}</p>
+              {(destinationData.address?.city || destinationData.city) && <p><small>City: {destinationData.address?.city || destinationData.city}</small></p>}
+              {(destinationData.address?.country || destinationData.country) && <p><small>Country: {destinationData.address?.country || destinationData.country}</small></p>}
+              <hr style={{ margin: "15px 0" }} />
+              <h4>User Profile:</h4>
               {renderUserDetails(userData)}
             </div>
             <div className="modal-actions">
-              <button onClick={handleFinalConfirmation} className="confirm-btn">
-                Confirm and Proceed
-              </button>
-              <button onClick={handleCloseConfirmationModal} className="cancel-btn">
-                Cancel
-              </button>
+              <button onClick={handleFinalConfirmation} className="confirm-btn">Confirm & See Results</button>
+              <button onClick={handleCloseConfirmationModal} className="cancel-btn">Cancel</button>
             </div>
           </div>
         </div>

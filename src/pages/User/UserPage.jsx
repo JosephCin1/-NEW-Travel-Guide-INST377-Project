@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom'; 
 import UserSearchForm from './UserSearchForm';
 import UserDetailsForm from './UserDetailsForm';
 import {
@@ -16,12 +16,12 @@ const UserPage = () => {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [lastSearchedUsername, setLastSearchedUsername] = useState('');
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate(); 
 
   const PREFERENCE_KEYS = [
     "outdoor", "activity_intensity", "cultural", "social", "budget",
     "local_flavor", "touristy", "indoor", "eventful", "romantic"
-  ]; //
+  ]; 
 
   const handleLookupUser = async (username) => {
     setIsLoading(true);
@@ -76,26 +76,14 @@ const UserPage = () => {
     const { data: updatedUser, error } = await updateUserPreferences(userId, preferences);
     if (error) {
       setMessage(`Failed to update preferences: ${error.message}`);
-      setIsLoading(false); // Keep loading false on error
+      setIsLoading(false); 
     } else {
       setCurrentUser(updatedUser);
-      // setEditingUser(updatedUser); // No longer needed if navigating away
       setMessage('Preferences updated successfully! Redirecting...');
-      // Redirect after a short delay to allow the user to see the success message
       setTimeout(() => {
-        navigate('/'); // Navigate to the main page (assuming '/' is your main page route)
-      }, 1500); // 1.5 seconds delay
+        navigate('/'); 
+      }, 1500); 
     }
-    // setIsLoading(false); // Will be false after navigation or if already set in error block
-  };
-
-  const handleCancelEdit = () => {
-    if (currentUser && editingUser && currentUser.user_id === editingUser.user_id) {
-        setEditingUser(currentUser);
-    } else {
-        setEditingUser(null);
-    }
-     setMessage(currentUser ? `Editing cancelled for ${editingUser?.username}. User ${currentUser.username} details are shown.` : 'Editing cancelled.');
   };
 
 
@@ -119,106 +107,6 @@ const UserPage = () => {
           }}
           loading={isLoading}
         />
-=======
-import React, { useState } from 'react';
-import UsernameChecker from '../../components/UsernameChecker';
-import PreferenceSlider from '../../components/PreferenceSlider';
-
-const UsersPage = () => {
-  const [searchText, setSearchText] = useState('');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [isUsernameAvailable, setIsUsernameAvailable] = useState(null);
-  const [username, setUsername] = useState('');
-
-  const handleUsernameAvailability = (available) => {
-    setIsUsernameAvailable(available);
-  };
-
-  return (
-    <div style={{ padding: '2rem', maxWidth: '500px', margin: 'auto' }}>
-      <input
-        type="text"
-        placeholder="Search users"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        style={{ width: '100%', padding: '0.5rem', fontSize: '1rem', marginBottom: '1rem' }}
-      />
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-        <button
-          onClick={() => alert(`Look up feature not implemented.\nSearch text: ${searchText}`)}
-          style={{ flex: 1, marginRight: '0.5rem', padding: '0.5rem' }}
-        >
-          Look Up
-        </button>
-
-        <button
-          onClick={() => {
-            setShowCreateModal(true);
-            setUsername('');
-            setIsUsernameAvailable(null);
-          }}
-          style={{ flex: 1, marginLeft: '0.5rem', padding: '0.5rem' }}
-        >
-          Create User
-        </button>
-      </div>
-
-      {showCreateModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-          onClick={() => setShowCreateModal(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: '#121212',
-              padding: '2rem',
-              borderRadius: '8px',
-              width: '100%',
-              maxWidth: '400px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.8)',
-              position: 'relative',
-              color: 'white',
-            }}
-          >
-            <button
-              onClick={() => setShowCreateModal(false)}
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                background: 'transparent',
-                border: 'none',
-                fontSize: '1.5rem',
-                cursor: 'pointer',
-                color: 'white',
-              }}
-              aria-label="Close modal"
-            >
-              &times;
-            </button>
-
-            <h3>Create New User</h3>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <UsernameChecker
-                onAvailabilityChange={handleUsernameAvailability}
-                setUsername={setUsername}
-              />
-            </div>
-
-            <PreferenceSlider active={false} />
-          </div>
-        </div>
       )}
     </div>
   );
