@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { LoadScript } from '@react-google-maps/api';
 
@@ -12,14 +11,11 @@ import Navbar from './components/Navbar/Navbar';
 
 import './App.css';
 
-// Google Maps API Key and libraries
-const googleApiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
 const libraries = ['places'];
 
 export default function App() {
   return (
     <LoadScript
-      googleMapsApiKey={googleApiKey}
       libraries={libraries}
       loadingElement={
         <div style={{
@@ -45,10 +41,8 @@ export default function App() {
             <Route path="/search_results" element={<SearchResults />} />
             <Route path="/lookup-search" element={<LookupSearchPage />} /> 
             <Route path="/users" element={<UserPage />} />
-            {/* Add other routes as needed */}
           </Routes>
         </div>
-
         <footer>© 2025 Travel Guide</footer>
       </Router>
     </LoadScript>
