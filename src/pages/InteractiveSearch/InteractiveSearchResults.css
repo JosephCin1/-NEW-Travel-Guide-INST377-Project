@@ -61,17 +61,16 @@
 }
 
 .username-form button[type="submit"]:disabled {
-  background-color: #b0c4de; /* Lighter blue when disabled */
+  background-color: #b0c4de; 
   cursor: not-allowed;
 }
 
 .error-message {
-  color: #dc3545; /* Bootstrap danger color */
+  color: #dc3545; 
   margin-top: 10px;
   font-size: 0.95em;
 }
 
-/* Confirmation Modal Styles (can be refactored into a shared modal CSS) */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -83,7 +82,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 15px; /* For small screens */
+  padding: 15px;
 }
 
 .modal-content.confirmation-modal {
@@ -91,7 +90,7 @@
   padding: 20px 30px;
   border-radius: 10px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  max-width: 700px; /* Wider for more details */
+  max-width: 700px; 
   width: 95%;
   max-height: 85vh;
   overflow-y: auto;
@@ -133,7 +132,7 @@
 .modal-actions {
   margin-top: 30px;
   display: flex;
-  justify-content: flex-end; /* Align buttons to the right */
+  justify-content: flex-end; 
   gap: 15px;
 }
 
@@ -179,7 +178,7 @@
 .navigation-buttons {
   display: flex;
   justify-content: center;
-  gap: 20px; /* Adds space between buttons */
+  gap: 20px; 
 }
 
 .action-button {
@@ -188,9 +187,9 @@
   border-radius: 5px;
   border: none;
   cursor: pointer;
-  text-decoration: none; /* For Link components styled as buttons */
-  display: inline-block; /* For Link components */
-  background-color: #007bff; /* Primary button color */
+  text-decoration: none; 
+  display: inline-block; 
+  background-color: #007bff; 
   color: white;
   transition: background-color 0.3s ease;
 }
@@ -200,14 +199,13 @@
 }
 
 .action-button.secondary {
-  background-color: #6c757d; /* Secondary button color */
+  background-color: #6c757d; 
 }
 
 .action-button.secondary:hover {
   background-color: #545b62;
 }
 
-/* For general page container, loading, error (if not already defined globally) */
 .page-container {
   padding: 20px;
   max-width: 1200px;
