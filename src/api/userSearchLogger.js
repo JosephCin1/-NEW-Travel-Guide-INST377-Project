@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient'; // Or 'src/api/supabaseClient'
+import { supabase } from './supabaseClient'; 
 
 export const logUserSearch = async ({ userId, destination, preferences }) => {
   if (!userId || !destination || !destination.name || !preferences) {
@@ -20,7 +20,7 @@ export const logUserSearch = async ({ userId, destination, preferences }) => {
     country: destination.country || null,
     coordinates: dbCoordinates,
     outdoor: preferences.outdoor,
-    activity_intens: preferences.activity_intensity,
+    activity_intensity: preferences.activity_intensity,
     cultural: preferences.cultural,
     social: preferences.social,
     budget: preferences.budget,

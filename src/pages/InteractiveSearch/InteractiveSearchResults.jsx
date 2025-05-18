@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './InteractiveSearchResults.css'; //
-import { supabase } from 'src/api/supabaseClient'; //
+import './InteractiveSearchResults.css'; 
+import { supabase } from 'src/api/supabaseClient'; 
 
 const fetchUserData = async (usernameToFind) => {
   console.log(`Workspaceing data from Supabase for username: ${usernameToFind}`);

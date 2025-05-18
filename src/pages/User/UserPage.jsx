@@ -21,7 +21,7 @@ const UserPage = () => {
   const PREFERENCE_KEYS = [
     "outdoor", "activity_intensity", "cultural", "social", "budget",
     "local_flavor", "touristy", "indoor", "eventful", "romantic"
-  ]; //
+  ]; 
 
   const handleLookupUser = async (username) => {
     setIsLoading(true);
@@ -84,15 +84,6 @@ const UserPage = () => {
         navigate('/'); 
       }, 1500); 
     }
-  };
-
-  const handleCancelEdit = () => {
-    if (currentUser && editingUser && currentUser.user_id === editingUser.user_id) {
-        setEditingUser(currentUser);
-    } else {
-        setEditingUser(null);
-    }
-     setMessage(currentUser ? `Editing cancelled for ${editingUser?.username}. User ${currentUser.username} details are shown.` : 'Editing cancelled.');
   };
 
 
