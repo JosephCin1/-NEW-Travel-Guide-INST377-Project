@@ -18,6 +18,7 @@
   font-size: 1.1em;
   margin-bottom: 5px;
   text-align: left;
+  color: black;
 }
 
 .search-form input[type="text"] {
@@ -70,7 +71,7 @@
 }
 
 .modal-content {
-  background-color: white;
+  background-color: rgb(128, 125, 125);
   padding: 25px;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -79,6 +80,7 @@
   max-height: 80vh;
   overflow-y: auto;
   text-align: left;
+  color: black;
 }
 
 .modal-content h3 {
