@@ -8,6 +8,7 @@ import SearchResults from './pages/SearchResults/SearchResults';
 import InteractiveSearchResults from './pages/InteractiveSearch/InteractiveSearchResults';
 import LookupSearchPage from './pages/LookupSearch/LookupSearchPage';
 import Navbar from './components/Navbar/Navbar';
+import Footer from './components/Footer/Footer'
 
 import './App.css';
 
@@ -43,7 +44,7 @@ export default function App() {
             <Route path="/users" element={<UserPage />} />
           </Routes>
         </div>
-        <footer>© 2025 Travel Guide</footer>
+      <Footer />
       </Router>
     </LoadScript>
   );

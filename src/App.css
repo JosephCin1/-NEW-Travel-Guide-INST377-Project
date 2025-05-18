@@ -24,10 +24,3 @@ html, body, #root {
   flex-direction: column; 
 }
 
-footer {
-  text-align: center;
-  padding: 20px;
-  background-color: #f0f0f0;
-  width: 100%;
-  box-sizing: border-box;
-}
