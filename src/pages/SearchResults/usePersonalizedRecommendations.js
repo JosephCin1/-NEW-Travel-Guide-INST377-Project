@@ -17,41 +17,36 @@ const getMatchScore = (item, defaultValue = 0) => {
 
 export const usePersonalizedRecommendations = (destination, user, initialSearchId) => {
   const [suggestions, setSuggestions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // Main loading state for UI
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [processedSearchId, setProcessedSearchId] = useState(initialSearchId);
 
   const isLoadingRecommendationsRef = useRef(false);
-  const currentLoadingOrLoadedSearchIdRef = useRef(null);
+
+  const lastLoadedSearchContextIdRef = useRef(null);
 
   useEffect(() => {
-    currentLoadingOrLoadedSearchIdRef.current = null;
+    lastLoadedSearchContextIdRef.current = null; 
     isLoadingRecommendationsRef.current = false; 
   }, [destination, user]);
 
-
   const loadRecommendations = useCallback(async (currentSearchIdToProcess) => {
-    if (!destination || !user || !user.user_id) {
-      setError("User or destination data is critically missing for recommendations.");
-      setIsLoading(false); 
+    if (!destination?.name || !user?.user_id) {
+      setError("User or destination data is missing.");
+      setIsLoading(false);
       return;
     }
-
     const preferencesSource = user.preferences || user;
     const hasValidPreferences = PREFERENCE_CATEGORIES.every(catKey =>
       typeof preferencesSource[catKey] === 'number'
     );
-
-    if (!destination.name || !hasValidPreferences) {
-      let missingInfoError = "";
-      if (!destination.name) missingInfoError += "Destination name is missing. ";
-      if (!hasValidPreferences) missingInfoError += "User preferences are incomplete or invalid. ";
-      setError(missingInfoError.trim() || "Required data for recommendations is missing.");
-      setIsLoading(false); 
+    if (!hasValidPreferences) {
+      setError("User preferences are incomplete or invalid.");
+      setIsLoading(false);
       return;
     }
 
-    setIsLoading(true); 
+    setIsLoading(true);
     setError(null);
 
     let searchIdForThisRun = currentSearchIdToProcess;
@@ -59,10 +54,7 @@ export const usePersonalizedRecommendations = (destination, user, initialSearchI
     try {
       if (!searchIdForThisRun) {
         const userPrefsForLogging = PREFERENCE_CATEGORIES.reduce((acc, catKey) => {
-          const value = preferencesSource[catKey];
-          if (typeof value === 'number') {
-            acc[catKey] = value;
-          }
+          if (typeof preferencesSource[catKey] === 'number') acc[catKey] = preferencesSource[catKey];
           return acc;
         }, {});
 
@@ -73,10 +65,10 @@ export const usePersonalizedRecommendations = (destination, user, initialSearchI
         });
 
         if (searchLogError || !loggedSearchId) {
-          throw new Error(`Failed to log user search or obtain search_id: ${searchLogError?.message || 'Unknown error'}`);
+          throw new Error(`Failed to log user search: ${searchLogError?.message || 'Unknown error'}`);
         }
         searchIdForThisRun = loggedSearchId;
-        setProcessedSearchId(loggedSearchId); 
+        setProcessedSearchId(loggedSearchId);
       }
 
       const rawLlmSuggestions = await fetchPersonalizedRecommendationsFromLLM(destination, preferencesSource);
@@ -86,8 +78,7 @@ export const usePersonalizedRecommendations = (destination, user, initialSearchI
           await resolveAndStorePlaceSuggestions(rawLlmSuggestions, destination, preferencesSource);
 
         if (dbProcessingError) {
-          console.error("DB Processing Error:", dbProcessingError);
-          setError(prevErr => (prevErr ? `${prevErr}; ` : '') + `Issues processing suggestions: ${dbProcessingError.message}`);
+          setError(`Issues processing suggestions: ${dbProcessingError.message}`);
         }
 
         const sortedSuggestions = (finalSuggestionsForDisplay || []).sort((a, b) => getMatchScore(b) - getMatchScore(a));
@@ -114,86 +105,62 @@ export const usePersonalizedRecommendations = (destination, user, initialSearchI
                 };
               }
             }
-            console.warn(`Skipping item for match logging (missing place_id, characteristics, or valid matchScore): ${item.placeName || item.place_id}`, item);
-            return null;
+            return null; 
           }).filter(match => match !== null);
 
           if (matchesToLog.length > 0) {
-            const { error: matchLogError } = await logSearchMatches({
-              searchId: searchIdForThisRun,
-              matches: matchesToLog,
-            });
-            if (matchLogError) {
-              console.warn("Failed to log search matches:", matchLogError.message);
-            } else {
-              console.log("Search matches logged successfully for search_id:", searchIdForThisRun);
-            }
+            await logSearchMatches({ searchId: searchIdForThisRun, matches: matchesToLog });
           }
         }
       } else {
-        setSuggestions([]);
-        console.log("LLM returned no initial suggestions.");
+        setSuggestions([]); 
       }
     } catch (err) {
-      console.error("Error during the recommendation loading process:", err);
-      setError(err.message || "An unexpected error occurred while fetching recommendations.");
-    } finally {
+      console.error("Error in loadRecommendations:", err); 
+      setError(err.message || "An unexpected error occurred.");
     }
-  }, [destination, user]);
+  }, [destination, user]); 
 
   useEffect(() => {
     if (!destination || !user || !user.user_id) {
-      setIsLoading(false);
+      setIsLoading(false); 
       return;
     }
-
     if (isLoadingRecommendationsRef.current) {
-      return;
+      return; 
     }
 
-    let searchIdToEvaluate = initialSearchId || processedSearchId; 
+    const idToLoad = initialSearchId; 
 
-    let shouldLoad = false;
-    if (searchIdToEvaluate) { 
-        if (searchIdToEvaluate !== currentLoadingOrLoadedSearchIdRef.current) {
-            shouldLoad = true;
-        }
-    } else { 
-        if (currentLoadingOrLoadedSearchIdRef.current !== 'new_search_initiated') {
-            shouldLoad = true;
-        }
-    }
-    
+    if (idToLoad) { 
+      if (idToLoad === lastLoadedSearchContextIdRef.current) {
+        return; 
+      }
+      if (idToLoad !== processedSearchId) {
+        setProcessedSearchId(idToLoad);
+      }
+    } else {
+      if (lastLoadedSearchContextIdRef.current !== null) {
 
-    if (initialSearchId && initialSearchId !== processedSearchId && initialSearchId !== currentLoadingOrLoadedSearchIdRef.current) {
-        shouldLoad = true;
+        if (processedSearchId && lastLoadedSearchContextIdRef.current === processedSearchId) return;
 
-        setProcessedSearchId(initialSearchId);
-        searchIdToEvaluate = initialSearchId; 
+      }
     }
 
+    isLoadingRecommendationsRef.current = true;
+    setIsLoading(true);
+    setSuggestions([]);
+    setError(null);
 
-    if (shouldLoad) {
-      isLoadingRecommendationsRef.current = true;
-      setIsLoading(true); 
-      setSuggestions([]); 
-      setError(null); 
 
-      currentLoadingOrLoadedSearchIdRef.current = searchIdToEvaluate ? searchIdToEvaluate : 'new_search_initiated';
+    loadRecommendations(idToLoad)
+      .finally(() => {
+        isLoadingRecommendationsRef.current = false;
+        setIsLoading(false);
+        lastLoadedSearchContextIdRef.current = idToLoad || processedSearchId;
+      });
 
-      loadRecommendations(searchIdToEvaluate) 
-        .finally(() => {
-          isLoadingRecommendationsRef.current = false;
-          setIsLoading(false); 
-
-          const finalSearchIdProcessed = searchIdToEvaluate || processedSearchId;
-          if (finalSearchIdProcessed) {
-            currentLoadingOrLoadedSearchIdRef.current = finalSearchIdProcessed;
-          }
-        });
-    }
   }, [initialSearchId, destination, user, loadRecommendations, processedSearchId]);
-
 
   return { suggestions, isLoading, error, searchId: processedSearchId };
 };
