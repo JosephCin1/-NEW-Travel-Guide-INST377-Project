@@ -1,12 +1,35 @@
-# React + Vite
+# Travel Guide
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Description
 
-Currently, two official plugins are available:
+Travel Guide is an AI-powered travel planning web application that allows users to search for destinations, explore attractions, and receive personalized recommendations based on their preferences. Users can create profiles, store search histories, and get smart suggestions using location and interest matching. The app is optimized for usability and quick access to relevant travel data.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Target Browsers
 
-## Expanding the ESLint configuration
+This web app is fully responsive and functional on Desktop browsers:
+- Chrome
+- Firefox
+- Safari
+- Edge
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Developer Manual
+
+For detailed technical documentation on installation, running, testing, and API references, see the [Developer Manual](./docs/DEVELOPER_MANUAL.md).
+
+---
+
+## 1. Installation Instructions
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+- Git
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/your-username/travel-guide.git
+cd travel-guide
+npm install
+npm run dev
