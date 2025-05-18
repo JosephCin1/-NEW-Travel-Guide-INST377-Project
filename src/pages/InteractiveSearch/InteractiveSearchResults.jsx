@@ -1,31 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './InteractiveSearchResults.css';
-import { supabase } from 'src/api/supabaseClient'; 
+import './InteractiveSearchResults.css'; //
+import { supabase } from 'src/api/supabaseClient'; //
 
 // Updated fetchUserData function to use Supabase
 const fetchUserData = async (usernameToFind) => {
   console.log(`Workspaceing data from Supabase for username: ${usernameToFind}`);
   try {
-    // Ensure your 'users' table has a column named 'username' (or adjust the column name below).
-    // Using .ilike() for a case-insensitive search. Use .eq() for case-sensitive.
     const { data, error, status } = await supabase
-      .from('users') 
-      .select('*')   
-      .eq('username', usernameToFind) 
+      .from('users')
+      .select('*')
+      .eq('username', usernameToFind)
       .single();
 
     if (error) {
-      console.error('Supabase lookup error:', error);
-      if (status !== 406 && error.message !== 'JSON object requested, multiple (or no) rows returned') { // 406 is usually for .single() not finding rows
-         return { success: false, message: `Database error: ${error.message}` };
+      if (status === 406 || (error.details && error.details.includes("0 rows"))) {
+        return { success: false, message: `User "${usernameToFind}" not found.` };
       }
+      console.error('Supabase lookup error:', error);
+      return { success: false, message: `Database error: ${error.message}` };
     }
 
     if (data) {
       return { success: true, data: data };
     } else {
-      return { success: false, message: "User not found." };
+      return { success: false, message: `User "${usernameToFind}" not found.` };
     }
   } catch (err) {
     console.error("Unexpected error fetching user data:", err);
@@ -37,43 +36,53 @@ const fetchUserData = async (usernameToFind) => {
 const InteractiveSearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  // Corrected line: Reverted to use location.state?.location
   const destinationData = location.state?.location;
+  const initialUsername = location.state?.username || '';
 
-  const [usernameInput, setUsernameInput] = useState('');
+  const [usernameInput, setUsernameInput] = useState(initialUsername);
   const [userData, setUserData] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
   const [userError, setUserError] = useState(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [showRegisterButton, setShowRegisterButton] = useState(false);
 
   useEffect(() => {
     if (!destinationData) {
-      console.log('No destination data received. Consider redirecting.');
+      console.log('No destination data received in InteractiveSearchResults. Check navigation state from SearchPage.');
       // navigate('/'); // Example redirect
     }
   }, [destinationData, navigate]);
 
   const handleUsernameChange = (e) => {
     setUsernameInput(e.target.value);
+    setUserError(null);
+    setShowRegisterButton(false);
   };
 
   const handleUsernameSubmit = async (e) => {
     e.preventDefault();
     if (!usernameInput.trim()) {
       setUserError("Please enter a username.");
+      setShowRegisterButton(false);
       return;
     }
     setIsLoadingUser(true);
     setUserError(null);
     setUserData(null);
+    setShowRegisterButton(false);
+    setIsConfirmationModalOpen(false);
 
-    // Call the updated fetchUserData function
-    const response = await fetchUserData(usernameInput);
+    const response = await fetchUserData(usernameInput.trim());
 
     if (response.success) {
       setUserData(response.data);
       setIsConfirmationModalOpen(true);
     } else {
       setUserError(response.message || "Failed to find user.");
+      if (response.message && response.message.toLowerCase().includes("not found")) {
+        setShowRegisterButton(true);
+      }
     }
     setIsLoadingUser(false);
   };
@@ -82,14 +91,20 @@ const InteractiveSearchResults = () => {
     setIsConfirmationModalOpen(false);
     navigate('/search_results', {
       state: {
+        // Ensure the key used here ('destination') matches what '/search_results' page expects
         destination: destinationData,
-        user: userData
+        user: userData,
+        preferences: userData
       }
     });
   };
 
   const handleCloseConfirmationModal = () => {
     setIsConfirmationModalOpen(false);
+  };
+
+  const navigateToUserPage = () => {
+    navigate('/users');
   };
 
   if (!destinationData) {
@@ -103,41 +118,37 @@ const InteractiveSearchResults = () => {
   }
 
   const renderUserDetails = (user) => {
-    // This helper function remains the same, it will dynamically display
-    // whatever key-value pairs are in the user data object fetched from Supabase.
     if (!user) return null;
     return Object.entries(user).map(([key, value]) => {
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) { // Check if it's a non-array object
+      if (key === 'user_id' || key === 'created_at') return null;
+      const displayKey = key.replace(/_/g, ' ').charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         return (
           <div key={key} className="user-detail-nested">
-            <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong>
+            <strong>{displayKey}:</strong>
             <div style={{ paddingLeft: '15px' }}>
               {renderUserDetails(value)}
             </div>
           </div>
         );
-      } else if (Array.isArray(value)) { // Handle arrays
+      } else if (Array.isArray(value)) {
          return (
           <p key={key} className="user-detail-item">
-            <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value.join(', ')}
+            <strong>{displayKey}:</strong> {value.join(', ')}
           </p>
         );
       }
       return (
         <p key={key} className="user-detail-item">
-          <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {String(value)}
+          <strong>{displayKey}:</strong> {String(value)}
         </p>
       );
     });
   };
 
-  // ... rest of the JSX for InteractiveSearchResults component remains the same ...
-  // (username form, modal, etc.)
   return (
     <div className="page-container interactive-search-container">
-      <h2>Interactive Search for: {destinationData.name}</h2>
-      {/* <p>Lat: {destinationData.lat}, Lon: {destinationData.lon}</p> */}
-      {/* <hr /> */}
+      <h2>Interactive Search for: {destinationData?.name || 'your destination'}</h2>
 
       <form onSubmit={handleUsernameSubmit} className="username-form">
         <h3>Enter Your Username to Personalize</h3>
@@ -153,7 +164,16 @@ const InteractiveSearchResults = () => {
         <button type="submit" disabled={isLoadingUser}>
           {isLoadingUser ? 'Looking up...' : 'Lookup User'}
         </button>
-        {userError && <p className="error-message">{userError}</p>}
+        {userError && (
+          <div className="user-message-container">
+            <p className="error-message">{userError}</p>
+            {showRegisterButton && (
+              <button type="button" onClick={navigateToUserPage} className="register-button-inline action-button">
+                Create User
+              </button>
+            )}
+          </div>
+        )}
       </form>
 
       {isConfirmationModalOpen && userData && (
@@ -162,13 +182,12 @@ const InteractiveSearchResults = () => {
             <h3>Confirm Your Details</h3>
             <div className="confirmation-details">
               <h4>Destination:</h4>
-              <p>{destinationData.name}</p>
-              {destinationData.address?.country && <p><small>Country: {destinationData.address.country}</small></p>}
-              {destinationData.address?.city && <p><small>City: {destinationData.address.city}</small></p>}
-
-
+              <p>{destinationData?.name || 'N/A'}</p>
+              {(destinationData?.address?.city || destinationData?.city) &&
+                <p><small>City: {destinationData?.address?.city || destinationData?.city}</small></p>}
+              {(destinationData?.address?.country || destinationData?.country) &&
+                <p><small>Country: {destinationData?.address?.country || destinationData?.country}</small></p>}
               <hr style={{margin: "15px 0"}}/>
-
               <h4>User Details:</h4>
               {renderUserDetails(userData)}
             </div>
